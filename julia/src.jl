@@ -97,6 +97,19 @@ strip_parens(ϕ, parens) = ϕ[[1, end]] == parens ? ϕ[2:end-1] : ϕ
 strip_parens(ϕ) = converge(ϕ, [strip_parens(ϕ, parens) for PARENS])
 strip_formula(ϕ) = converge(ϕ, [strip, strip_parens])
 
+function continue_abort()
+	while true
+		print("[C]ontinue/[A]bort? ")
+		inp = chomp(readline())
+		if inp == "c" || inp == "C"
+			break
+		elseif inp == "a" || inp == "A"
+			println("Aborting")
+			exit()
+		end
+	end
+end
+
 function parse_formula(ϕ)
 	ϕ = strip_formula(ϕ)
 	for p in [parse_imp, parse_or, parse_and, parse_neg]
@@ -104,11 +117,11 @@ function parse_formula(ϕ)
 			return ϕ⁺
 		end
 	end
-	if is_atomic(ϕ)
-		return ϕ
-	else
-		println("Either we parsed it wrong or you supplied a malformed formula: >$ϕ<")
+	if !is_atomic(ϕ)
+		println("Following will be regarded as an atomic proposition: >$ϕ<")
+		continue_abort()
 	end
+	return ϕ
 end
 
 function parse_sequent(Δ)
@@ -122,8 +135,10 @@ function parse_sequent(Δ)
 		end
 		if length(splits) > 2
 			println("Multiple $seq symbols detected")
+			continue_abort()
 		end
 	end
-	Φ = map(strip, split(Φ, ','))
+	Φ = map(parse_formula, split(Φ, ','))
+	ψ = parse_formula(ψ)
 	Sequent(Φ, ψ)
 end
