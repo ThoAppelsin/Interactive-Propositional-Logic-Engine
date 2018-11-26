@@ -1,22 +1,24 @@
-Formula = Union{Atom, Neg, And, Or, Imp}
+abstract type Formula end
 
-Atom = AbstractString
+struct Atom <: Formula
+	p::String
+end
 
-struct Neg
+struct Neg <: Formula
 	ϕ::Formula
 end
 
-struct And
+struct And <: Formula
 	ϕ₁::Formula
 	ϕ₂::Formula
 end
 
-struct Or
+struct Or <: Formula
 	ϕ₁::Formula
 	ϕ₂::Formula
 end
 
-struct Imp
+struct Imp <: Formula
 	ϕ₁::Formula
 	ϕ₂::Formula
 end
@@ -25,6 +27,11 @@ struct Sequent
 	Φ::Array{Formula}
 	ψ::Formula
 end
+
+¬ϕ = Neg(ϕ)
+ϕ ∧ ψ = And(ϕ, ψ)
+ϕ ∨ ψ = Or(ϕ, ψ)
+ϕ → ψ = Imp(ϕ, ψ)
 
 @enum Assoc LeftAssoc RightAssoc
 
@@ -75,7 +82,7 @@ function parse_binary(ϕ, Op, OP, assoc)
 	end
 end
 
-is_atomic(ϕ) = match(ATOM, ϕ) == ϕ
+is_atomic(ϕ) = match(ATOM, ϕ) ≠ nothing
 parse_neg(ϕ) = parse_unary(ϕ, Neg, NEG)
 parse_and(ϕ) = parse_binary(ϕ, And, AND, LeftAssoc)
 parse_or(ϕ)  = parse_binary(ϕ, Or, OR, LeftAssoc)
@@ -93,8 +100,8 @@ function converge(subject, functions)
 	end
 end
 
-strip_parens(ϕ, parens) = ϕ[[1, end]] == parens ? ϕ[2:end-1] : ϕ
-strip_parens(ϕ) = converge(ϕ, [strip_parens(ϕ, parens) for PARENS])
+strip_parens(ϕ, parens) = !isempty(ϕ) && ϕ[[1, end]] == parens ? ϕ[2:end-1] : ϕ
+strip_parens(ϕ) = converge(ϕ, [ϕ -> strip_parens(ϕ, parens) for parens ∈ PARENS])
 strip_formula(ϕ) = converge(ϕ, [strip, strip_parens])
 
 function continue_abort()
@@ -121,7 +128,7 @@ function parse_formula(ϕ)
 		println("Following will be regarded as an atomic proposition: >$ϕ<")
 		continue_abort()
 	end
-	return ϕ
+	return Atom(ϕ)
 end
 
 function parse_sequent(Δ)
@@ -138,7 +145,44 @@ function parse_sequent(Δ)
 			continue_abort()
 		end
 	end
-	Φ = map(parse_formula, split(Φ, ','))
+	Φ = map(parse_formula, split(Φ, ',', keepempty=false))
 	ψ = parse_formula(ψ)
 	Sequent(Φ, ψ)
 end
+
+struct ProofStep
+	ϕ::Formula
+	rationale::String
+end
+
+Andᵢ(Γ, i, j) = if i ≤ length(Γ) && j ≤ length(Γ)
+	[Γ; ProofStep(Γ[i].ϕ ∧ Γ[j].ϕ, "∧ᵢ $i, $j")]
+end
+
+Andₑ₁(Γ, i) = if i ≤ length(Γ)
+	ϕ = Γ[i].ϕ
+	if typeof(ϕ) == And
+		[Γ; ProofStep(ϕ.ϕ₁, "∧ₑ₁ $i")]
+	end
+end
+
+Andₑ₂(Γ, i) = if i ≤ length(Γ)
+	ϕ = Γ[i].ϕ
+	if typeof(ϕ) == And
+		[Γ; ProofStep(ϕ.ϕ₂, "∧ₑ₂ $i")]
+	end
+end
+
+Orᵢ₁(Γ, i, ψ) = if i ≤ length(Γ)
+	ψ = parse_formula(ψ)
+	[Γ; ProofStep(Γ[i].ϕ ∨ ψ, "∨ᵢ₁ $i")]
+end
+
+Orᵢ₂(Γ, i, ψ) = if i ≤ length(Γ)
+	ψ = parse_formula(ψ)
+	[Γ; ProofStep(ψ ∨ Γ[i].ϕ, "∨ᵢ₂ $i")]
+end
+
+Orₑ(Γ, i, j, k) = if 
+
+# println(parse_sequent(length(ARGS) ≥ 1 ? ARGS[1] : "a & b"))
