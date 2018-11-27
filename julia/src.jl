@@ -1,26 +1,66 @@
 abstract type Formula end
+abstract type Compound <: Formula end
+abstract type Unit <: Formula end
+abstract type Literal <: Unit end
 
-struct Atom <: Formula
+struct True <: Literal end
+struct False <: Literal end
+
+struct Atom <: Unit
 	p::String
 end
 
-struct Neg <: Formula
+struct Neg <: Unit
 	ϕ::Formula
 end
 
-struct And <: Formula
+struct And <: Compound
 	ϕ₁::Formula
 	ϕ₂::Formula
 end
 
-struct Or <: Formula
+struct Or <: Compound
 	ϕ₁::Formula
 	ϕ₂::Formula
 end
 
-struct Imp <: Formula
+struct Imp <: Compound
 	ϕ₁::Formula
 	ϕ₂::Formula
+end
+
+function Base.show(io::IO, ϕ::Unit)
+	if typeof(ϕ) == Neg
+		if typeof(ϕ.ϕ) <: Unit
+			print(io, '¬', ϕ.ϕ)
+		else
+			print(io, "¬(", ϕ.ϕ, ')')
+		end
+	else
+		print(io, ϕ.p)
+	end
+end
+
+function Base.show(io::IO, ϕ::Compound)
+	if typeof(ϕ.ϕ₁) <: Unit
+		print(io, ϕ.ϕ₁)
+	else
+		print(io, '(', ϕ.ϕ₁, ')')
+	end
+
+	if typeof(ϕ) == And
+		print(io, '&')
+	elseif typeof(ϕ) == Or
+		print(io, '|')
+	else
+		print(io, '→')
+	end
+
+	if typeof(ϕ.ϕ₂) <: Unit
+		print(io, ϕ.ϕ₂)
+	else
+		print(io, '(', ϕ.ϕ₂, ')')
+	end
 end
 
 struct Sequent
@@ -63,7 +103,7 @@ balanced_parens(ϕ) = all(balanced_parens(ϕ, parens) for parens ∈ PARENS)
 function parse_unary(ϕ, Op, OP)
 	for op ∈ OP
 		if startswith(ϕ, op)
-			return Op(parse_formula(a[length(op)+1:end]))
+			return Op(parse_formula(ϕ[length(op)+1:end]))
 		end
 	end
 end
@@ -104,10 +144,14 @@ strip_parens(ϕ, parens) = !isempty(ϕ) && ϕ[[1, end]] == parens ? ϕ[2:end-1] 
 strip_parens(ϕ) = converge(ϕ, [ϕ -> strip_parens(ϕ, parens) for parens ∈ PARENS])
 strip_formula(ϕ) = converge(ϕ, [strip, strip_parens])
 
+function input(prompt="")
+	print(prompt)
+	return chomp(readline())
+end
+
 function continue_abort()
 	while true
-		print("[C]ontinue/[A]bort? ")
-		inp = chomp(readline())
+		inp = input("[C]ontinue/[A]bort? ")
 		if inp == "c" || inp == "C"
 			break
 		elseif inp == "a" || inp == "A"
@@ -155,34 +199,160 @@ struct ProofStep
 	rationale::String
 end
 
-Andᵢ(Γ, i, j) = if i ≤ length(Γ) && j ≤ length(Γ)
+andi(Γ, i, j) = if i ≤ length(Γ) && j ≤ length(Γ)
 	[Γ; ProofStep(Γ[i].ϕ ∧ Γ[j].ϕ, "∧ᵢ $i, $j")]
 end
 
-Andₑ₁(Γ, i) = if i ≤ length(Γ)
+ande1(Γ, i) = if i ≤ length(Γ)
 	ϕ = Γ[i].ϕ
 	if typeof(ϕ) == And
 		[Γ; ProofStep(ϕ.ϕ₁, "∧ₑ₁ $i")]
 	end
 end
 
-Andₑ₂(Γ, i) = if i ≤ length(Γ)
+ande2(Γ, i) = if i ≤ length(Γ)
 	ϕ = Γ[i].ϕ
 	if typeof(ϕ) == And
 		[Γ; ProofStep(ϕ.ϕ₂, "∧ₑ₂ $i")]
 	end
 end
 
-Orᵢ₁(Γ, i, ψ) = if i ≤ length(Γ)
-	ψ = parse_formula(ψ)
+ori1(Γ, i, ψ) = if i ≤ length(Γ)
+	if !(typeof(ψ) <: Formula)
+		ψ = parse_formula(ψ)
+	end
 	[Γ; ProofStep(Γ[i].ϕ ∨ ψ, "∨ᵢ₁ $i")]
 end
 
-Orᵢ₂(Γ, i, ψ) = if i ≤ length(Γ)
-	ψ = parse_formula(ψ)
+ori2(Γ, i, ψ) = if i ≤ length(Γ)
+	if !(typeof(ψ) <: Formula)
+		ψ = parse_formula(ψ)
+	end
 	[Γ; ProofStep(ψ ∨ Γ[i].ϕ, "∨ᵢ₂ $i")]
 end
 
-Orₑ(Γ, i, j, k) = if 
+function ore(Γ, i, J, K)
+	if i > length(Γ)
+		return
+	end
+
+	ϕ = Γ[i].ϕ
+	if typeof(ϕ) ≠ Or
+		return
+	end
+
+	j₁, j₂ = J
+	k₁, k₂ = K
+
+	return [Γ; ProofStep(Γ[j₂].ϕ, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")]
+end
+
+function impi(Γ, I)
+	i₁, i₂ = I
+	return [Γ; ProofStep(Γ[i₁].ϕ → Γ[i₂].ϕ, "→ᵢ, $i₁-$i₂")]
+end
+
+function impe(Γ, i, j)
+	return [Γ; ProofStep(Γ[j].ϕ.ϕ₂, "→ₑ, $i, $j")]
+end
+
+function negi(Γ, I)
+	i₁, i₂ = I
+	return [Γ; ProofStep(¬Γ[i₁].ϕ, "¬ᵢ, $i₁-$i₂")]
+end
+
+function nege(Γ, i, j)
+	return [Γ; ProofStep(False(), "¬ₑ, $i, $j")]
+end
+
+function bote(Γ, i, ψ)
+	if !(typeof(ψ) <: Formula)
+		ψ = parse_formula(ψ)
+	end
+	return [Γ; ProofStep(ψ, "⊥ₑ, $i")]
+end
+
+function negnegi(Γ, i)
+	return [Γ; ProofStep(¬¬Γ[i].ϕ, "¬¬ᵢ, $i")]
+end
+	
+function negnege(Γ, i)
+	return [Γ; ProofStep(Γ[i].ϕ.ϕ.ϕ, "¬¬ₑ, $i")]
+end
+
+function MT(Γ, i, j)
+	return [Γ; ProofStep(¬Γ[i].ϕ.ϕ₁, "MT, $i, $j")]
+end
+
+function PBC(Γ, I)
+	i₁, i₂ = I
+	return [Γ; ProofStep(Γ[i₁].ϕ.ϕ, "PBC, $i₁, $i₂")]
+end
+
+function LEM(Γ, ψ)
+	if !(typeof(ψ) <: Formula)
+		ψ = parse_formula(ψ)
+	end
+	return [Γ; ProofStep(ψ ∨ ¬ψ, "LEM")]
+end
+
+nd_rules = String.(Symbol.((andi, ande1, ande2,
+							ori1, ori2, ore,
+							impi, impe,
+							negi, nege,
+							bote,
+							negnegi, negnege,
+							MT, PBC, LEM)))
+
+function prompt_nd()
+	inp = input("Natural deduction: ")
+	nd = map(strip, split(inp, r",|\s+", keepempty=false))
+	rule = nd[1]
+	args = nd[2:end]
+	
+	if rule ∉ nd_rules
+		println("Unknown rule >", rule, "<, please retry")
+		return prompt_nd()
+	end
+
+	return eval(Symbol(rule)), map(x -> parse(Int, x), args)
+end
+
+function Base.show(io::IO, γ::ProofStep)
+	print(io, γ.ϕ, " (", γ.rationale, ")")
+end
+
+function Base.show(io::IO, Γ::Array{ProofStep})
+	for (i, γ) ∈ enumerate(Γ)
+		println(i, ". ", γ)
+	end
+end
+
+function clear()
+	run(`cmd /c cls`)
+	# println("\33[2J")
+end
+
+function main(args)
+	clear()
+	Δ = parse_sequent(input("Sequent: "))
+
+	Γ = ProofStep[ProofStep(ϕ, "Premise") for ϕ ∈ Δ.Φ]
+	while true
+		clear()
+		println("== Working Proof ==")
+		print(Γ)
+		println("== Target ==")
+		println(Δ.ψ)
+		if Δ.ψ ∈ (γ.ϕ for γ in Γ)
+			println("Target reached!")
+			break
+		end
+		nd_rule, nd_args = prompt_nd()
+		Γ = nd_rule(Γ, nd_args...)
+	end
+end
+
+main(ARGS)
 
 # println(parse_sequent(length(ARGS) ≥ 1 ? ARGS[1] : "a & b"))
