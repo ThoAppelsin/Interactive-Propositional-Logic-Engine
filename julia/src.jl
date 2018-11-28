@@ -143,7 +143,10 @@ function converge(subject, functions)
 	end
 end
 
-strip_parens(ϕ, parens) = !isempty(ϕ) && ϕ[[1, end]] == parens ? ϕ[2:end-1] : ϕ
+strip_parens(ϕ, parens) = !isempty(ϕ) && ϕ[[1, end]] == parens ? begin
+	ϕ⁺ = ϕ[2:end-1]
+	balanced_parens(ϕ⁺) ? ϕ⁺ : ϕ
+end : ϕ
 strip_parens(ϕ) = converge(ϕ, [ϕ -> strip_parens(ϕ, parens) for parens ∈ PARENS])
 strip_formula(ϕ) = converge(ϕ, [strip, strip_parens])
 
@@ -204,22 +207,22 @@ function parse_sequent(Δ)
 	Sequent(Φ, ψ)
 end
 
-struct ProofStep
+mutable struct ProofStep
 	indent::Bool
 	ϕ::Formula
 	rationale::String
-	outdent::Bool
+	outdent::Int
 end
 
-ProofStep(ϕ::Formula, rationale::AbstractString) = ProofStep(false, ϕ, rationale, false)
-ProofStep(indent::Bool, ϕ::Formula, rationale::AbstractString) = ProofStep(indent, ϕ, rationale, false)
-ProofStep(ϕ::Formula, rationale::AbstractString, outdent::Bool) = ProofStep(false, ϕ, rationale, outdent)
+ProofStep(ϕ::Formula, rationale::AbstractString) = ProofStep(false, ϕ, rationale, 0)
+ProofStep(indent::Bool, ϕ::Formula, rationale::AbstractString) = ProofStep(indent, ϕ, rationale, 0)
+ProofStep(ϕ::Formula, rationale::AbstractString, outdent::Int) = ProofStep(false, ϕ, rationale, outdent)
 
 (Γ::Array{ProofStep})(i::Int64) = Γ[i].ϕ
 
-function accessible(Γ::Array{ProofStep}, ante::Int, subseq::Int)
-	if ante < subseq ≤ length(Γ) + 1 && !Γ[ante].outdent
-		d = 0
+function dent_balance(Γ::Array{ProofStep}, ante, subseq=length(Γ) + 1; d=0)
+	d -= Γ[ante].outdent
+	if ante < subseq ≤ length(Γ) + 1 && d ≥ 0
 		for i ∈ ante+1:subseq-1
 			d += Γ[i].indent - Γ[i].outdent
 			if d < 0
@@ -231,10 +234,15 @@ function accessible(Γ::Array{ProofStep}, ante::Int, subseq::Int)
 end
 
 Γ::Array{ProofStep} ≡ ante::Int =
-	accessible(Γ, ante, length(Γ) + 1) ≠ nothing
+	dent_balance(Γ, ante) ≠ nothing
 
-is_subproof(Γ::Array{ProofStep}, ante::Int, subseq::Int) =
-	Γ[ante].indent && Γ[subseq].outdent && accessible(Γ, ante, subseq) == 0
+is_subproof(Γ::Array{ProofStep}, ante, subseq) =
+	Γ[ante].indent && Γ[subseq].outdent ≠ 0 &&
+	(ante == subseq || dent_balance(Γ, ante, subseq) == 0)
+
+Γ::Array{ProofStep} ≡ I::Array{Int} =
+	is_subproof(Γ, I...) &&
+	dent_balance(Γ, I[2]; d=1) ≠ nothing
 
 function andi(Γ, i, j)
 	if Γ ≡ i && Γ ≡ j
@@ -260,15 +268,15 @@ function ande2(Γ, i)
 	end
 end
 
-function ori1(Γ, i, ψ)
-	if Γ ≡ i
+function ori1(Γ, i, ψ=nothing)
+	if ψ ≠ nothing && Γ ≡ i
 		ψ = parse_formula(ψ)
 		ProofStep(Γ(i) ∨ ψ, "∨ᵢ₁, $i")
 	end
 end
 
-function ori2(Γ, i, ψ)
-	if Γ ≡ i
+function ori2(Γ, i, ψ=nothing)
+	if ψ ≠ nothing && Γ ≡ i
 		ψ = parse_formula(ψ)
 		ProofStep(ψ ∨ Γ(i), "∨ᵢ₂, $i")
 	end
@@ -277,7 +285,7 @@ end
 function ore(Γ, i, J, K)
 	j₁, j₂ = J
 	k₁, k₂ = K
-	if Γ ≡ i && Γ ≡ j₂ && Γ ≡ k₂ && is_subproof(Γ, J...) && is_subproof(Γ, K...)
+	if Γ ≡ i && Γ ≡ J && Γ ≡ K
 		χ₁ = Γ(j₂)
 		χ₂ = Γ(k₂)
 		if typeof(Γ(i)) == Or && χ₁ == χ₂
@@ -288,15 +296,15 @@ end
 
 function impi(Γ, I)
 	i₁, i₂ = I
-	if Γ ≡ i₂ && is_subproof(Γ, I...)
+	if Γ ≡ I
 		ProofStep(Γ(i₁) → Γ(i₂), "→ᵢ, $i₁-$i₂")
 	end
 end
 
 function impe(Γ, i, j)
 	if Γ ≡ i && Γ ≡ j
-		ϕ = Γ(j)
-		if typeof(ϕ) == Imp && Γ(i) == ϕ.ϕ₁
+		ϕ = Γ(i)
+		if typeof(ϕ) == Imp && Γ(j) == ϕ.ϕ₁
 			ProofStep(ϕ.ϕ₂, "→ₑ, $i, $j")
 		end
 	end
@@ -304,7 +312,7 @@ end
 
 function negi(Γ, I)
 	i₁, i₂ = I
-	if Γ ≡ i₂ && is_subproof(Γ, I...) && Γ(i₂) == False()
+	if Γ ≡ I && Γ(i₂) == False()
 		ProofStep(¬Γ(i₁), "¬ᵢ, $i₁-$i₂")
 	end
 end
@@ -319,8 +327,8 @@ function nege(Γ, i, j)
 	end
 end
 
-function bote(Γ, i, ψ)
-	if Γ ≡ i && Γ(i) == False()
+function bote(Γ, i, ψ=nothing)
+	if ψ ≠ nothing && Γ ≡ i && Γ(i) == False()
 		ψ = parse_formula(ψ)
 		ProofStep(ψ, "⊥ₑ, $i")
 	end
@@ -356,7 +364,7 @@ end
 
 function PBC(Γ, I)
 	i₁, i₂ = I
-	if Γ ≡ i₂ && is_subproof(Γ, I...) && Γ(i₂) == False()
+	if Γ ≡ I && Γ(i₂) == False()
 		ϕ = Γ(i₁)
 		if typeof(ϕ) == Neg
 			ProofStep(ϕ.ϕ, "PBC, $i₁, $i₂")
@@ -364,14 +372,35 @@ function PBC(Γ, I)
 	end
 end
 
-function LEM(Γ, ψ)
-	ψ = parse_formula(ψ)
-	ProofStep(ψ ∨ ¬ψ, "LEM")
+function LEM(Γ, ψ=nothing)
+	if ψ ≠ nothing
+		ψ = parse_formula(ψ)
+		ProofStep(ψ ∨ ¬ψ, "LEM")
+	end
 end
 
-function assume(Γ, ψ)
-	ψ = parse_formula(ψ)
-	ProofStep(true, ψ, "Assumption")
+function assume(Γ, ψ=nothing)
+	if ψ ≠ nothing
+		ψ = parse_formula(ψ)
+		ProofStep(true, ψ, "Assumption")
+	end
+end
+
+function conclude(Γ)
+	if dent_balance(Γ, 1; d=Γ[1].indent) ≥ 1
+		Γ[end].outdent += 1
+	end
+end
+
+function undo(Γ)
+	if length(Γ) ≥ 1
+		if Γ[end].outdent ≥ 1
+			Γ[end].outdent -= 1
+			return false
+		else
+			return true
+		end
+	end
 end
 
 nd_rules = String.(Symbol.((andi, ande1, ande2,
@@ -381,22 +410,36 @@ nd_rules = String.(Symbol.((andi, ande1, ande2,
 							bote,
 							negnegi, negnege,
 							MT, PBC, LEM,
-							assume)))
+							assume, conclude, undo)))
 
-isnumstr(str) = all(isdigit(x) for x in str)
+isnumstr(str) = all(isdigit(x) for x ∈ str)
+hasnum(str) = any(isdigit(x) for x ∈ str)
 
 function prompt_nd()
 	inp = input("Natural deduction: ")
-	rule, args = map(strip, split(inp, r",|\s+", keepempty=false, limit=2))
+	rule_args = map(strip, split(inp, r",|\s+", keepempty=false, limit=2))
+	rule = rule_args[1]
+	args = length(rule_args) ≥ 2 ? rule_args[2] : ""
 	
 	if rule ∉ nd_rules
 		println("Unknown rule >", rule, "<, please retry")
 		return prompt_nd()
 	end
 
-	eachmatch(r"(?:\d+-\d+)|\d+|[^\d,]+", args) # TODO
+	function arg_switch(m)
+		if isnumstr(m)
+			parse(Int, m)
+		elseif hasnum(m)
+			parse.(Int, split(m, '-'))
+		else
+			parse_formula(m)
+		end
+	end
 
-	return eval(Symbol(rule)), map(x -> parse(Int, x), args)
+	argregex = r"(?:\d+-\d+)|\d+|[^\d,]+"
+	args = arg_switch.(filter(!isempty, strip.(getfield.(eachmatch(argregex, args), :match))))
+	
+	return eval(Symbol(rule)), args
 end
 
 function Base.show(io::IO, γ::ProofStep)
@@ -404,8 +447,39 @@ function Base.show(io::IO, γ::ProofStep)
 end
 
 function Base.show(io::IO, Γ::Array{ProofStep})
+	if isempty(Γ)
+		println("[intentionally left blank]")
+		return
+	end
+
+	widind = length(digits(length(Γ)))
+
+	ϕstrs = [repr(γ.ϕ) for γ ∈ Γ]
+	ratstrs = getfield.(Γ, :rationale)
+
+	widϕ = maximum(length.(ϕstrs))
+	widrat = maximum(length.(ratstrs))
+
+	indent = 0
 	for (i, γ) ∈ enumerate(Γ)
-		println(i, ". ", γ)
+		if γ.indent
+			println(' ' ^ (widind + 2),
+					"|  " ^ indent,
+					'┌', '─' ^ (widϕ + 6 + widrat), '┐')
+			indent += 1
+		end
+		println(' ' ^ (widind - length(digits(i))), i, ". ",
+				"|  " ^ indent,
+				ϕstrs[i],
+				' ' ^ (widϕ + widrat - length(ϕstrs[i]) - length(ratstrs[i]) + 2),
+				ratstrs[i],
+				indent ≥ 1 ? "  |" : "")
+		for i ∈ 1:γ.outdent
+			indent -= 1
+			println(' ' ^ (widind + 2),
+					"|  " ^ indent,
+					'└', '─' ^ (widϕ + 6 + widrat), '┘')
+		end
 	end
 end
 
@@ -421,6 +495,18 @@ function clear(entirely=false)
 	end
 end
 
+function accomplished(Γ, ψ)
+	d = 0
+	for γ ∈ Γ
+		d += γ.indent
+		if d == 0 && γ.ϕ == ψ
+			return true
+		end
+		d -= γ.outdent
+	end
+	return false
+end
+
 function main(args)
 	clear()
 	Δ = parse_sequent(input("Sequent: "))
@@ -432,7 +518,7 @@ function main(args)
 		println(Γ)
 		println("== Target ==")
 		println(Δ.ψ, '\n')
-		if Δ.ψ ∈ (γ.ϕ for γ in Γ)
+		if accomplished(Γ, Δ.ψ)
 			println("Target reached!")
 			break
 		end
@@ -440,7 +526,13 @@ function main(args)
 			nd_rule, nd_args = prompt_nd()
 			γ = nd_rule(Γ, nd_args...)
 			if γ ≠ nothing
-				push!(Γ, γ)
+				if nd_rule == undo
+					if γ == true
+						Γ = Γ[1:end-1]
+					end
+				elseif typeof(γ) ≠ Int
+					push!(Γ, γ)
+				end
 				break
 			end
 			println("Ill-formed natural deduction rule, try again.")
