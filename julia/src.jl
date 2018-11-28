@@ -49,11 +49,11 @@ function Base.show(io::IO, ϕ::Compound)
 	end
 
 	if typeof(ϕ) == And
-		print(io, '&')
+		print(io, " & ")
 	elseif typeof(ϕ) == Or
-		print(io, '|')
+		print(io, " | ")
 	else
-		print(io, '→')
+		print(io, " → ")
 	end
 
 	if typeof(ϕ.ϕ₂) <: Unit
@@ -76,7 +76,9 @@ end
 @enum Assoc LeftAssoc RightAssoc
 
 PARENS = ["()", "[]"]
-ATOM = r"^[A-Za-z][0-9]*$"
+TRUE = ["T", "TRUE"]
+FALSE = ["F", "FALSE"]
+ATOM = r"^[a-z][0-9]*$"
 NEG = ["!"]
 AND = ["&", "*"]
 OR  = ["|", "+"]
@@ -122,6 +124,7 @@ function parse_binary(ϕ, Op, OP, assoc)
 	end
 end
 
+is_literal(ϕ) = ϕ ∈ TRUE || ϕ ∈ FALSE
 is_atomic(ϕ) = match(ATOM, ϕ) ≠ nothing
 parse_neg(ϕ) = parse_unary(ϕ, Neg, NEG)
 parse_and(ϕ) = parse_binary(ϕ, And, AND, LeftAssoc)
@@ -161,12 +164,19 @@ function continue_abort()
 	end
 end
 
-function parse_formula(ϕ)
+function parse_formula(ϕ::Formula)
+	return ϕ
+end
+
+function parse_formula(ϕ::AbstractString)
 	ϕ = strip_formula(ϕ)
 	for p in [parse_imp, parse_or, parse_and, parse_neg]
 		if (ϕ⁺ = p(ϕ)) ≠ nothing
 			return ϕ⁺
 		end
+	end
+	if is_literal(ϕ)
+		return ϕ ∈ TRUE ? True() : False()
 	end
 	if !is_atomic(ϕ)
 		println("Following will be regarded as an atomic proposition: >$ϕ<")
@@ -195,39 +205,40 @@ function parse_sequent(Δ)
 end
 
 struct ProofStep
-	level::Int
+	indent::Bool
 	ϕ::Formula
 	rationale::String
+	outdent::Bool
 end
 
-mutable struct Proof
-	steps::Array{ProofStep}
-	current_level::Int
-end
+ProofStep(ϕ::Formula, rationale::AbstractString) = ProofStep(false, ϕ, rationale, false)
+ProofStep(indent::Bool, ϕ::Formula, rationale::AbstractString) = ProofStep(indent, ϕ, rationale, false)
+ProofStep(ϕ::Formula, rationale::AbstractString, outdent::Bool) = ProofStep(false, ϕ, rationale, outdent)
 
-function accessible(Γ::Proof, target::Int)
-	if target > length(Γ.steps) || Γ.current_level < target
-		return false
-	end
-	for i ∈ target:length(Γ.steps)
-		if Γ.steps[i].level < Γ.steps[target].level
-			return false
+(Γ::Array{ProofStep})(i::Int64) = Γ[i].ϕ
+
+function accessible(Γ::Array{ProofStep}, ante::Int, subseq::Int)
+	if ante < subseq ≤ length(Γ) + 1 && !Γ[ante].outdent
+		d = 0
+		for i ∈ ante+1:subseq-1
+			d += Γ[i].indent - Γ[i].outdent
+			if d < 0
+				return
+			end
 		end
+		return d
 	end
-	return true
 end
 
-Γ::Proof ≡ target::Int = accessible(Γ, target)
-Base.getindex(Γ::Proof, i::Int64) = Γ.steps[i]
-(Γ::Proof)(i::Int64) = Γ[i].ϕ
+Γ::Array{ProofStep} ≡ ante::Int =
+	accessible(Γ, ante, length(Γ) + 1) ≠ nothing
 
-function add_step(Γ, ϕ, rationale)
-	push!(Γ.steps, ProofStep(Γ.current_level, ϕ, rationale))
-end
+is_subproof(Γ::Array{ProofStep}, ante::Int, subseq::Int) =
+	Γ[ante].indent && Γ[subseq].outdent && accessible(Γ, ante, subseq) == 0
 
-function andi(Γ::Proof, i, j)
+function andi(Γ, i, j)
 	if Γ ≡ i && Γ ≡ j
-		add_step(Γ, Γ(i) ∧ Γ(j), "∧ᵢ, $i, $j")
+		ProofStep(Γ(i) ∧ Γ(j), "∧ᵢ, $i, $j")
 	end
 end
 
@@ -235,7 +246,7 @@ function ande1(Γ, i)
 	if Γ ≡ i
 		ϕ = Γ(i)
 		if typeof(ϕ) == And
-			add_step(Γ, ϕ.ϕ₁, "∧ₑ₁, $i")
+			ProofStep(ϕ.ϕ₁, "∧ₑ₁, $i")
 		end
 	end
 end
@@ -244,94 +255,123 @@ function ande2(Γ, i)
 	if Γ ≡ i
 		ϕ = Γ(i)
 		if typeof(ϕ) == And
-			add_step(Γ, ϕ.ϕ₂, "∧ₑ₂, $i")
+			ProofStep(ϕ.ϕ₂, "∧ₑ₂, $i")
 		end
 	end
 end
 
-# TODO
-
 function ori1(Γ, i, ψ)
-	if i ≤ length(Γ)
-		if !(typeof(ψ) <: Formula)
-			ψ = parse_formula(ψ)
-		end
-		[Γ; ProofStep(1, Γ[i].ϕ ∨ ψ, "∨ᵢ₁ $i")]
+	if Γ ≡ i
+		ψ = parse_formula(ψ)
+		ProofStep(Γ(i) ∨ ψ, "∨ᵢ₁, $i")
 	end
 end
 
 function ori2(Γ, i, ψ)
-	if i ≤ length(Γ)
-		if !(typeof(ψ) <: Formula)
-			ψ = parse_formula(ψ)
-		end
-		[Γ; ProofStep(1, ψ ∨ Γ[i].ϕ, "∨ᵢ₂ $i")]
+	if Γ ≡ i
+		ψ = parse_formula(ψ)
+		ProofStep(ψ ∨ Γ(i), "∨ᵢ₂, $i")
 	end
 end
 
 function ore(Γ, i, J, K)
-	if i > length(Γ)
-		return
-	end
-
-	ϕ = Γ[i].ϕ
-	if typeof(ϕ) ≠ Or
-		return
-	end
-
 	j₁, j₂ = J
 	k₁, k₂ = K
-
-	return [Γ; ProofStep(1, Γ[j₂].ϕ, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")]
+	if Γ ≡ i && Γ ≡ j₂ && Γ ≡ k₂ && is_subproof(Γ, J...) && is_subproof(Γ, K...)
+		χ₁ = Γ(j₂)
+		χ₂ = Γ(k₂)
+		if typeof(Γ(i)) == Or && χ₁ == χ₂
+			ProofStep(χ₁, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")
+		end
+	end
 end
 
 function impi(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(1, Γ[i₁].ϕ → Γ[i₂].ϕ, "→ᵢ, $i₁-$i₂")]
+	if Γ ≡ i₂ && is_subproof(Γ, I...)
+		ProofStep(Γ(i₁) → Γ(i₂), "→ᵢ, $i₁-$i₂")
+	end
 end
 
 function impe(Γ, i, j)
-	return [Γ; ProofStep(1, Γ[j].ϕ.ϕ₂, "→ₑ, $i, $j")]
+	if Γ ≡ i && Γ ≡ j
+		ϕ = Γ(j)
+		if typeof(ϕ) == Imp && Γ(i) == ϕ.ϕ₁
+			ProofStep(ϕ.ϕ₂, "→ₑ, $i, $j")
+		end
+	end
 end
 
 function negi(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(1, ¬Γ[i₁].ϕ, "¬ᵢ, $i₁-$i₂")]
+	if Γ ≡ i₂ && is_subproof(Γ, I...) && Γ(i₂) == False()
+		ProofStep(¬Γ(i₁), "¬ᵢ, $i₁-$i₂")
+	end
 end
 
 function nege(Γ, i, j)
-	return [Γ; ProofStep(1, False(), "¬ₑ, $i, $j")]
+	if Γ ≡ i && Γ ≡ j
+		ϕ₁ = Γ(i)
+		ϕ₂ = Γ(j)
+		if typeof(ϕ₂) == Neg && ϕ₁ == ϕ₂.ϕ
+			ProofStep(False(), "¬ₑ, $i, $j")
+		end
+	end
 end
 
 function bote(Γ, i, ψ)
-	if !(typeof(ψ) <: Formula)
+	if Γ ≡ i && Γ(i) == False()
 		ψ = parse_formula(ψ)
+		ProofStep(ψ, "⊥ₑ, $i")
 	end
-	return [Γ; ProofStep(1, ψ, "⊥ₑ, $i")]
 end
 
 function negnegi(Γ, i)
-	return [Γ; ProofStep(1, ¬¬Γ[i].ϕ, "¬¬ᵢ, $i")]
+	if Γ ≡ i
+		ProofStep(¬¬Γ(i), "¬¬ᵢ, $i")
+	end
 end
-	
+
 function negnege(Γ, i)
-	return [Γ; ProofStep(1, Γ[i].ϕ.ϕ.ϕ, "¬¬ₑ, $i")]
+	if Γ ≡ i
+		ϕ = Γ(i)
+		if typeof(ϕ) == Neg
+			ϕ = ϕ.ϕ
+			if typeof(ϕ) == Neg
+				ProofStep(ϕ.ϕ, "¬¬ₑ, $i")
+			end
+		end
+	end
 end
 
 function MT(Γ, i, j)
-	return [Γ; ProofStep(1, ¬Γ[i].ϕ.ϕ₁, "MT, $i, $j")]
+	if Γ ≡ i && Γ ≡ j
+		ϕ₁ = Γ(i)
+		ϕ₂ = Γ(j)
+		if typeof(ϕ₁) == Imp && typeof(ϕ₂) == Neg && ϕ₁.ϕ₂ == ϕ₂.ϕ
+			ProofStep(¬ϕ₁.ϕ₁, "MT, $i, $j")
+		end
+	end
 end
 
 function PBC(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(1, Γ[i₁].ϕ.ϕ, "PBC, $i₁, $i₂")]
+	if Γ ≡ i₂ && is_subproof(Γ, I...) && Γ(i₂) == False()
+		ϕ = Γ(i₁)
+		if typeof(ϕ) == Neg
+			ProofStep(ϕ.ϕ, "PBC, $i₁, $i₂")
+		end
+	end
 end
 
 function LEM(Γ, ψ)
-	if !(typeof(ψ) <: Formula)
-		ψ = parse_formula(ψ)
-	end
-	return [Γ; ProofStep(1, ψ ∨ ¬ψ, "LEM")]
+	ψ = parse_formula(ψ)
+	ProofStep(ψ ∨ ¬ψ, "LEM")
+end
+
+function assume(Γ, ψ)
+	ψ = parse_formula(ψ)
+	ProofStep(true, ψ, "Assumption")
 end
 
 nd_rules = String.(Symbol.((andi, ande1, ande2,
@@ -340,24 +380,27 @@ nd_rules = String.(Symbol.((andi, ande1, ande2,
 							negi, nege,
 							bote,
 							negnegi, negnege,
-							MT, PBC, LEM)))
+							MT, PBC, LEM,
+							assume)))
+
+isnumstr(str) = all(isdigit(x) for x in str)
 
 function prompt_nd()
 	inp = input("Natural deduction: ")
-	nd = map(strip, split(inp, r",|\s+", keepempty=false))
-	rule = nd[1]
-	args = nd[2:end]
+	rule, args = map(strip, split(inp, r",|\s+", keepempty=false, limit=2))
 	
 	if rule ∉ nd_rules
 		println("Unknown rule >", rule, "<, please retry")
 		return prompt_nd()
 	end
 
+	eachmatch(r"(?:\d+-\d+)|\d+|[^\d,]+", args) # TODO
+
 	return eval(Symbol(rule)), map(x -> parse(Int, x), args)
 end
 
 function Base.show(io::IO, γ::ProofStep)
-	print(io, γ.ϕ, " (", γ.rationale, ")")
+	print(io, γ.ϕ, "\t(", γ.rationale, ")")
 end
 
 function Base.show(io::IO, Γ::Array{ProofStep})
@@ -366,28 +409,42 @@ function Base.show(io::IO, Γ::Array{ProofStep})
 	end
 end
 
-function clear()
-	run(`cmd /c cls`)
+function print_title()
+	println("==== Interactive Propositional Logic Engine using Natural Deduction ====\n")
+end
+
+function clear(entirely=false)
 	# println("\33[2J")
+	run(`cmd /c cls`)
+	if !entirely
+		print_title()
+	end
 end
 
 function main(args)
 	clear()
 	Δ = parse_sequent(input("Sequent: "))
 
-	Γ = ProofStep[ProofStep(1, ϕ, "Premise") for ϕ ∈ Δ.Φ]
+	Γ = ProofStep[ProofStep(false, ϕ, "Premise", false) for ϕ ∈ Δ.Φ]
 	while true
 		clear()
 		println("== Working Proof ==")
-		print(Γ)
+		println(Γ)
 		println("== Target ==")
-		println(Δ.ψ)
+		println(Δ.ψ, '\n')
 		if Δ.ψ ∈ (γ.ϕ for γ in Γ)
 			println("Target reached!")
 			break
 		end
-		nd_rule, nd_args = prompt_nd()
-		Γ = nd_rule(Γ, nd_args...)
+		while true
+			nd_rule, nd_args = prompt_nd()
+			γ = nd_rule(Γ, nd_args...)
+			if γ ≠ nothing
+				push!(Γ, γ)
+				break
+			end
+			println("Ill-formed natural deduction rule, try again.")
+		end
 	end
 end
 
