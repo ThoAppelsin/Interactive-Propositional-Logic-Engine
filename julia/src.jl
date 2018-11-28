@@ -29,6 +29,10 @@ struct Imp <: Compound
 	ϕ₂::Formula
 end
 
+function Base.show(io::IO, ϕ::Literal)
+	print(io, typeof(ϕ) == True ? 'T' : '┴')
+end
+
 function Base.show(io::IO, ϕ::Unit)
 	if typeof(ϕ) == Neg
 		if typeof(ϕ.ϕ) <: Unit
@@ -221,15 +225,17 @@ ProofStep(ϕ::Formula, rationale::AbstractString, outdent::Int) = ProofStep(fals
 (Γ::Array{ProofStep})(i::Int64) = Γ[i].ϕ
 
 function dent_balance(Γ::Array{ProofStep}, ante, subseq=length(Γ) + 1; d=0)
-	d -= Γ[ante].outdent
-	if ante < subseq ≤ length(Γ) + 1 && d ≥ 0
-		for i ∈ ante+1:subseq-1
-			d += Γ[i].indent - Γ[i].outdent
-			if d < 0
-				return
+	if ante < subseq ≤ length(Γ) + 1
+		d -= Γ[ante].outdent
+		if d ≥ 0
+			for i ∈ ante+1:subseq-1
+				d += Γ[i].indent - Γ[i].outdent
+				if d < 0
+					return
+				end
 			end
+			return d
 		end
-		return d
 	end
 end
 
@@ -403,6 +409,12 @@ function undo(Γ)
 	end
 end
 
+function copy(Γ, i)
+	if Γ ≡ i
+		ProofStep(Γ(i), "Copy $i")
+	end
+end
+
 nd_rules = String.(Symbol.((andi, ande1, ande2,
 							ori1, ori2, ore,
 							impi, impe,
@@ -410,7 +422,8 @@ nd_rules = String.(Symbol.((andi, ande1, ande2,
 							bote,
 							negnegi, negnege,
 							MT, PBC, LEM,
-							assume, conclude, undo)))
+							assume, conclude, undo,
+							copy)))
 
 isnumstr(str) = all(isdigit(x) for x ∈ str)
 hasnum(str) = any(isdigit(x) for x ∈ str)
