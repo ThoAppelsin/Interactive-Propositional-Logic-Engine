@@ -195,40 +195,78 @@ function parse_sequent(Δ)
 end
 
 struct ProofStep
+	level::Int
 	ϕ::Formula
 	rationale::String
 end
 
-andi(Γ, i, j) = if i ≤ length(Γ) && j ≤ length(Γ)
-	[Γ; ProofStep(Γ[i].ϕ ∧ Γ[j].ϕ, "∧ᵢ $i, $j")]
+mutable struct Proof
+	steps::Array{ProofStep}
+	current_level::Int
 end
 
-ande1(Γ, i) = if i ≤ length(Γ)
-	ϕ = Γ[i].ϕ
-	if typeof(ϕ) == And
-		[Γ; ProofStep(ϕ.ϕ₁, "∧ₑ₁ $i")]
+function accessible(Γ::Proof, target::Int)
+	if target > length(Γ.steps) || Γ.current_level < target
+		return false
+	end
+	for i ∈ target:length(Γ.steps)
+		if Γ.steps[i].level < Γ.steps[target].level
+			return false
+		end
+	end
+	return true
+end
+
+Γ::Proof ≡ target::Int = accessible(Γ, target)
+Base.getindex(Γ::Proof, i::Int64) = Γ.steps[i]
+(Γ::Proof)(i::Int64) = Γ[i].ϕ
+
+function add_step(Γ, ϕ, rationale)
+	push!(Γ.steps, ProofStep(Γ.current_level, ϕ, rationale))
+end
+
+function andi(Γ::Proof, i, j)
+	if Γ ≡ i && Γ ≡ j
+		add_step(Γ, Γ(i) ∧ Γ(j), "∧ᵢ, $i, $j")
 	end
 end
 
-ande2(Γ, i) = if i ≤ length(Γ)
-	ϕ = Γ[i].ϕ
-	if typeof(ϕ) == And
-		[Γ; ProofStep(ϕ.ϕ₂, "∧ₑ₂ $i")]
+function ande1(Γ, i)
+	if Γ ≡ i
+		ϕ = Γ(i)
+		if typeof(ϕ) == And
+			add_step(Γ, ϕ.ϕ₁, "∧ₑ₁, $i")
+		end
 	end
 end
 
-ori1(Γ, i, ψ) = if i ≤ length(Γ)
-	if !(typeof(ψ) <: Formula)
-		ψ = parse_formula(ψ)
+function ande2(Γ, i)
+	if Γ ≡ i
+		ϕ = Γ(i)
+		if typeof(ϕ) == And
+			add_step(Γ, ϕ.ϕ₂, "∧ₑ₂, $i")
+		end
 	end
-	[Γ; ProofStep(Γ[i].ϕ ∨ ψ, "∨ᵢ₁ $i")]
 end
 
-ori2(Γ, i, ψ) = if i ≤ length(Γ)
-	if !(typeof(ψ) <: Formula)
-		ψ = parse_formula(ψ)
+# TODO
+
+function ori1(Γ, i, ψ)
+	if i ≤ length(Γ)
+		if !(typeof(ψ) <: Formula)
+			ψ = parse_formula(ψ)
+		end
+		[Γ; ProofStep(1, Γ[i].ϕ ∨ ψ, "∨ᵢ₁ $i")]
 	end
-	[Γ; ProofStep(ψ ∨ Γ[i].ϕ, "∨ᵢ₂ $i")]
+end
+
+function ori2(Γ, i, ψ)
+	if i ≤ length(Γ)
+		if !(typeof(ψ) <: Formula)
+			ψ = parse_formula(ψ)
+		end
+		[Γ; ProofStep(1, ψ ∨ Γ[i].ϕ, "∨ᵢ₂ $i")]
+	end
 end
 
 function ore(Γ, i, J, K)
@@ -244,56 +282,56 @@ function ore(Γ, i, J, K)
 	j₁, j₂ = J
 	k₁, k₂ = K
 
-	return [Γ; ProofStep(Γ[j₂].ϕ, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")]
+	return [Γ; ProofStep(1, Γ[j₂].ϕ, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")]
 end
 
 function impi(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(Γ[i₁].ϕ → Γ[i₂].ϕ, "→ᵢ, $i₁-$i₂")]
+	return [Γ; ProofStep(1, Γ[i₁].ϕ → Γ[i₂].ϕ, "→ᵢ, $i₁-$i₂")]
 end
 
 function impe(Γ, i, j)
-	return [Γ; ProofStep(Γ[j].ϕ.ϕ₂, "→ₑ, $i, $j")]
+	return [Γ; ProofStep(1, Γ[j].ϕ.ϕ₂, "→ₑ, $i, $j")]
 end
 
 function negi(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(¬Γ[i₁].ϕ, "¬ᵢ, $i₁-$i₂")]
+	return [Γ; ProofStep(1, ¬Γ[i₁].ϕ, "¬ᵢ, $i₁-$i₂")]
 end
 
 function nege(Γ, i, j)
-	return [Γ; ProofStep(False(), "¬ₑ, $i, $j")]
+	return [Γ; ProofStep(1, False(), "¬ₑ, $i, $j")]
 end
 
 function bote(Γ, i, ψ)
 	if !(typeof(ψ) <: Formula)
 		ψ = parse_formula(ψ)
 	end
-	return [Γ; ProofStep(ψ, "⊥ₑ, $i")]
+	return [Γ; ProofStep(1, ψ, "⊥ₑ, $i")]
 end
 
 function negnegi(Γ, i)
-	return [Γ; ProofStep(¬¬Γ[i].ϕ, "¬¬ᵢ, $i")]
+	return [Γ; ProofStep(1, ¬¬Γ[i].ϕ, "¬¬ᵢ, $i")]
 end
 	
 function negnege(Γ, i)
-	return [Γ; ProofStep(Γ[i].ϕ.ϕ.ϕ, "¬¬ₑ, $i")]
+	return [Γ; ProofStep(1, Γ[i].ϕ.ϕ.ϕ, "¬¬ₑ, $i")]
 end
 
 function MT(Γ, i, j)
-	return [Γ; ProofStep(¬Γ[i].ϕ.ϕ₁, "MT, $i, $j")]
+	return [Γ; ProofStep(1, ¬Γ[i].ϕ.ϕ₁, "MT, $i, $j")]
 end
 
 function PBC(Γ, I)
 	i₁, i₂ = I
-	return [Γ; ProofStep(Γ[i₁].ϕ.ϕ, "PBC, $i₁, $i₂")]
+	return [Γ; ProofStep(1, Γ[i₁].ϕ.ϕ, "PBC, $i₁, $i₂")]
 end
 
 function LEM(Γ, ψ)
 	if !(typeof(ψ) <: Formula)
 		ψ = parse_formula(ψ)
 	end
-	return [Γ; ProofStep(ψ ∨ ¬ψ, "LEM")]
+	return [Γ; ProofStep(1, ψ ∨ ¬ψ, "LEM")]
 end
 
 nd_rules = String.(Symbol.((andi, ande1, ande2,
@@ -337,7 +375,7 @@ function main(args)
 	clear()
 	Δ = parse_sequent(input("Sequent: "))
 
-	Γ = ProofStep[ProofStep(ϕ, "Premise") for ϕ ∈ Δ.Φ]
+	Γ = ProofStep[ProofStep(1, ϕ, "Premise") for ϕ ∈ Δ.Φ]
 	while true
 		clear()
 		println("== Working Proof ==")
