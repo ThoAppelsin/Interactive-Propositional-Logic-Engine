@@ -246,7 +246,7 @@ is_subproof(Γ::Array{ProofStep}, ante, subseq) =
 
 function andi(Γ, i, j)
 	if Γ ≡ i && Γ ≡ j
-		ProofStep(Γ(i) ∧ Γ(j), "∧ᵢ, $i, $j")
+		ProofStep(Γ(i) ∧ Γ(j), "^ᵢ, $i, $j")
 	end
 end
 
@@ -254,7 +254,7 @@ function ande1(Γ, i)
 	if Γ ≡ i
 		ϕ = Γ(i)
 		if typeof(ϕ) == And
-			ProofStep(ϕ.ϕ₁, "∧ₑ₁, $i")
+			ProofStep(ϕ.ϕ₁, "^ₑ₁, $i")
 		end
 	end
 end
@@ -263,7 +263,7 @@ function ande2(Γ, i)
 	if Γ ≡ i
 		ϕ = Γ(i)
 		if typeof(ϕ) == And
-			ProofStep(ϕ.ϕ₂, "∧ₑ₂, $i")
+			ProofStep(ϕ.ϕ₂, "^ₑ₂, $i")
 		end
 	end
 end
@@ -271,14 +271,14 @@ end
 function ori1(Γ, i, ψ=nothing)
 	if ψ ≠ nothing && Γ ≡ i
 		ψ = parse_formula(ψ)
-		ProofStep(Γ(i) ∨ ψ, "∨ᵢ₁, $i")
+		ProofStep(Γ(i) ∨ ψ, "vᵢ₁, $i")
 	end
 end
 
 function ori2(Γ, i, ψ=nothing)
 	if ψ ≠ nothing && Γ ≡ i
 		ψ = parse_formula(ψ)
-		ProofStep(ψ ∨ Γ(i), "∨ᵢ₂, $i")
+		ProofStep(ψ ∨ Γ(i), "vᵢ₂, $i")
 	end
 end
 
@@ -289,7 +289,7 @@ function ore(Γ, i, J, K)
 		χ₁ = Γ(j₂)
 		χ₂ = Γ(k₂)
 		if typeof(Γ(i)) == Or && χ₁ == χ₂
-			ProofStep(χ₁, "∨ₑ, $i, $j₁-$j₂, $k₁-$k₂")
+			ProofStep(χ₁, "vₑ, $i, $j₁-$j₂, $k₁-$k₂")
 		end
 	end
 end
@@ -330,7 +330,7 @@ end
 function bote(Γ, i, ψ=nothing)
 	if ψ ≠ nothing && Γ ≡ i && Γ(i) == False()
 		ψ = parse_formula(ψ)
-		ProofStep(ψ, "⊥ₑ, $i")
+		ProofStep(ψ, "┴ₑ, $i")
 	end
 end
 
