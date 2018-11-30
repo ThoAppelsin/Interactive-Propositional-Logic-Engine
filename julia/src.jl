@@ -497,7 +497,7 @@ function Base.show(io::IO, Γ::Array{ProofStep})
 end
 
 function print_title()
-	println("==== Interactive Propositional Logic Engine using Natural Deduction ====\n")
+	println("=== Interactive Propositional Logic Engine using Natural Deduction ===\n")
 end
 
 function clear(entirely=false)
