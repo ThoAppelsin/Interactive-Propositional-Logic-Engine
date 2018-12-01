@@ -1,5 +1,12 @@
 \documentclass{article}
-\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{backnaur}
+\usepackage{multirow}
+\usepackage{hhline}
+
+
+\renewcommand{\bnfpo}{\Coloneqq}
+
 \usepackage{fullpage}
 \usepackage{logicproof}
 \usepackage{parskip}
@@ -50,10 +57,10 @@
 \newcommand{\lem}{\ensuremath{\mathit{LEM}}}
 
 % formula logic
-\newcommand{\fneg}[1]{\ensuremath{\neg \left( #1 \right)}}
-\newcommand{\fland}[2]{\ensuremath{\left( #1 \right) \land \left( #2 \right)}}
-\newcommand{\flor}[2]{\ensuremath{\left( #1 \right) \lor \left( #2 \right)}}
-\newcommand{\fimp}[2]{\ensuremath{\left( #1 \right) \imp \left( #2 \right)}}
+\newcommand{\fneg}[1]{\ensuremath{\left(\neg #1 \right)}}
+\newcommand{\fland}[2]{\ensuremath{\left( #1 \land #2 \right)}}
+\newcommand{\flor}[2]{\ensuremath{\left( #1 \lor #2 \right)}}
+\newcommand{\fimp}[2]{\ensuremath{\left( #1 \imp #2 \right)}}
 
 % formula logic, parenthesis override
 \newcommand{\Fneg}[1]{\ensuremath{\neg #1}}
@@ -67,16 +74,189 @@
 \newcommand{\Fimp}[2]{\ensuremath{#1 \imp \left( #2 \right)}}
 \newcommand{\fimP}[2]{\ensuremath{\left( #1 \right) \imp #2}}
 
+\newcommand{\true}{\textbf{true}}
+\newcommand{\false}{\textbf{false}}
+
 \edef\restoreparindent{\parindent=\the\parindent\relax}
 \usepackage{parskip}
 \restoreparindent
 
-\title{CMPE 58S: Sp. Tp. Computer Aided Verification \\ Homework II: Some Exercises}
-\date{2018 October 5}
+\title{CMPE 58S: Sp. Tp. Computer Aided Verification \\ Project: Interactive Propositional Logic Engine using Natural Deduction}
+\date{\today{}}
 \author{Mehmet Utkan Gezer \\ 2018700060}
 
 \begin{document}
 \maketitle
+
+\section{Introduction}
+
+Propositional logic, also known as propositional calculus, is the branch
+of logic dealing with propositions. Natural deduction is a way of handling
+propositions, whereby we apply a collection of rules to infer new
+conclusions from zero or more premises, all of which themselves are
+propositions.
+
+For a more detailed introduction, we will be giving some definitions for
+propositions and natural deduction, along with its semantics.
+
+\subsection{Propositions}
+
+Propositions are declarative
+sentences with a truth value either \true{} or \false{},
+and can be recursively defined as the composition of
+some other, smaller, propositions. Smallest of propositions are
+called \textit{atomic} propositions, which are \textit{indecomposable}
+and are given a unique symbol for the declarations they make.
+
+\textit{Compositionals} are propositions composed of other propositions,
+i.e. propositions that are not atomic. In propositional logic, there
+are 4 different ways of composing a \textit{compositional}:
+
+\begin{enumerate}
+	\item Negation ($\neg$): Negation of a proposition. E.g.
+		``it does not rain'' is the negation of ``it rains''.
+		If the original proposition has the truth value
+		\true{}/\false{}, then its negation has the truth value
+		\false{}/\true{}, respectively.
+	\item Conjunction ($\land$): Conjunction of two propositions. E.g.
+		``it does not rain and I am 25'' is the conjunction of the propositions
+		``it does not rain'' and ``I am 25''. The compositional has
+		the truth value \true{} only if both of its constituents
+		have the truth value \true{}, and otherwise \false{}.
+	\item Disjunction ($\lor$): Disjunction of two propositions. E.g.
+		the non-exclusive sense of the statement
+		``it is sunny or I am 5'' is the conjunction of the propositions
+		``it is sunny'' and ``I am 5''. The compositional has the truth
+		value \false{} only if both of its constituents have the truth
+		value \false{}, otherwise (if either one or both of its constituents
+		have the truth value \true{}) the compositional is \true{}.
+	\item Implication ($\imp$): Implication of the second proposition,
+		also known as the \textit{consequent}, by the first proposition,
+		also known as the \textit{antecedent}. E.g.
+		``if it is sunny then I am happy'' is the implication of
+		the proposition ``I am happy'' by the proposition ``it is sunny''.
+		The compositional has the truth value \false{} only if the
+		antecedent and consequent are \true{} and \false{}, respectively.
+\end{enumerate}
+
+To formally define the \textit{language} of propositional logic's
+\textit{well-formed formulas}, we give its Backus Naur form (BNF)
+as follows:
+
+\begin{bnf*}
+	\bnfprod{$\phi$}
+	{
+		\bnfpn{atom} \bnfor
+		\bnfts{$\Big(\neg$} \bnfpn{$\phi$} \bnfts{$\Big)$} \bnfor
+		\bnfts{$\Big($} \bnfpn{$\phi$} \bnfts{$\land$}
+			\bnfpn{$\phi$} \bnfts{$\Big)$} \bnfor
+		\bnfts{$\Big($} \bnfpn{$\phi$} \bnfts{$\lor$}
+			\bnfpn{$\phi$} \bnfts{$\Big)$} \bnfor
+		\bnfts{$\Big($} \bnfpn{$\phi$} \bnfts{$\imp$}
+			\bnfpn{$\phi$} \bnfts{$\Big)$}
+	}\\
+	\bnfprod{atom}
+	{
+		\bnfts{$p$} \bnfor \bnfts{$q$} \bnfor \bnfts{\bnfsk} \bnfor
+		\bnfts{$p_1$} \bnfor \bnfts{$p_2$} \bnfor \bnfts{\bnfsk}
+	}
+\end{bnf*}
+
+While this definition requires each use of a compositional operator
+to introduce a new pair of parenthesis for the newly generated
+proposition to be a well-formed formula, in practice we encounter
+propositons with many of those parenthesis omitted. In absence of
+parenthesis to enforce an explicit precedence of operator application,
+following precedence conventions are consulted:
+
+\begin{itemize}
+	\item $\neg$ binds most tightly, followed by $\land$, $\lor$, and
+		finally $\imp$, in the given order.
+	\item Implication ($\imp$) is right-associative, i.e. the
+		rightmost implication is to be evaluated the first.
+\end{itemize}
+
+Some books, including \textit{Logic in Computer Science} by Huth and Ryan,
+regard $\land$ and $\lor$ operations as equal in precedence, in which
+case a proposition like $p \lor q \land r$ should either be regarded
+as unintelligible, or the same as $((p \lor q) \land r)$.
+We will be adhering to the above listed convention.
+
+\subsection{Natural deduction}
+
+Natural deduction is a way of reasoning about a given set of propositions
+and inferring new ones from them. Using a collection of \textit{proof rules},
+natural deduction allows us to come up with \textit{conclusions} starting
+off by a set of \textit{premises}. This relation between premises and
+conclusions are formalized by expressions called \textit{sequents},
+such as:
+$$
+\phi_1, \phi_2, \dotsc, \phi_n \vdash \psi.
+$$
+
+Sequents with no premises are also valid sequents, and are called
+\textit{theorems}.
+
+Rules of natural deduction, also known as the previously mentioned
+proof rules, are at the heart of natural deduction, and this project.
+They allow us to establish a valid proof step with a proposition,
+using the previously validated list of propositions.
+
+At any step, we may introduce an \textit{assumption} to the proof,
+which, however, will introduce an assumption box along with it.
+The top line of the assumption box is drawn right above the step
+at which the assumption is introduced. We may close the assumption
+box after any step. A proof rule may only be applied to propositions,
+such that;
+\begin{itemize}
+	\item Their validity must have been previously established, and
+	\item Either they must be outside any assumption box, or their
+		assumption box must not have been closed, yet.
+\end{itemize}
+
+A proof of a sequent is complete when the conclusion of the
+sequent is established using only the rules of natural deduction and
+starting off with only the premises of the sequent. It is important to
+note that an established proposition may not be the conclusion if it is
+found within an \textit{assumption box}.
+
+Here is a list of all natural deduction rules we have embedded into
+our program, given in sequents:
+
+\begin{center}
+	\renewcommand{\arraystretch}{1.4}
+	\newcommand{\nl}{\\[2pt]}
+	\newcommand{\nll}{\\[2pt]\hline}
+	\begin{tabular}{l l|l}
+		\multicolumn{2}{l|}{\textbf{Name}} & \textbf{Rule}\\\hhline{==|=}
+		\multirow{3}{*}{Conjunction}
+		& Introduction    & $\phi, \psi \vdash \phi \land \psi$\nl
+		& Elimination \#1 & $\phi \land \psi \vdash \phi$\nl
+		& Elimination \#2 & $\phi \land \psi \vdash \psi$\nll
+		\multirow{3}{*}{Disjunction}
+		& Introduction \#1 & $\phi \vdash \phi \lor \psi$\nl
+		& Introduction \#2 & $\psi \vdash \phi \lor \psi$\nl
+		& Elimination      & $\phi \lor \psi, \boxed{\phi \dotsb \chi},
+			\boxed{\psi \dotsb \chi} \vdash \chi$\nll
+		\multirow{2}{*}{Implication}
+		& Introduction & $\boxed{\phi \dotsb \psi} \vdash \phi \implies \psi$\nl
+		& Elimination  & $\phi, \phi \implies \psi \vdash \psi$\nll
+		\multirow{2}{*}{Negation}
+		& Introduction & $\boxed{\phi \dotsb \bot} \vdash \neg\phi$\nl
+		& Elimination  & $\phi, \neg\phi \vdash \bot$\nll
+		\multirow{1}{*}{\false{}}
+		& Elimination  & $\bot \vdash \phi$\nll
+		\multirow{2}{*}{Double negation}
+		& Introduction & $\phi \vdash \neg\neg\phi$\nl
+		& Elimination  & $\neg\neg\phi \vdash \phi$\nll
+		\multicolumn{2}{l|}{MT (Modus Tollens)}
+		& $\phi \imp \psi, \neg\psi \vdash \neg\phi$\nll
+		\multicolumn{2}{l|}{PBC (Proof by Contraditcion)}
+		& $\boxed{\neg\phi \dotsb \bot} \vdash \phi$\nll
+		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
+		& $\vdash \phi \lor \neg\phi$
+	\end{tabular}
+\end{center}
 
 \section{Exercises from book}
 Following exercises are from the book ``Logic in Computer Science:
