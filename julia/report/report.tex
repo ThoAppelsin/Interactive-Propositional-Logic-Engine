@@ -1,0 +1,408 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{logicproof}
+\usepackage{parskip}
+\usepackage{forest}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{colortbl, xcolor}
+
+\definecolor{Red}{rgb}{1,0.8,0.8}
+
+\newcommand{\imp}{\ensuremath{\rightarrow}}
+\newcommand{\seq}{\ensuremath{\vdash}}
+\newcommand{\ent}{\ensuremath{\models}}
+\newcommand{\elim}{\ensuremath{\mathit{e}}}
+\newcommand{\intr}{\ensuremath{\mathit{i}}}
+\newcommand{\rep}[1]{copy #1}
+
+% p116
+\newcommand{\landi}[2]{$\land_\intr$ #1, #2}
+\newcommand{\landex}[1]{$\land_{\elim_1}$ #1}
+\newcommand{\landey}[1]{$\land_{\elim_2}$ #1}
+\newcommand{\lorix}[1]{$\lor_{\intr_1}$ #1}
+\newcommand{\loriy}[1]{$\lor_{\intr_2}$ #1}
+\newcommand{\lore}[5]{$\lor_\elim$ #1, #2--#3, #4--#5}
+
+% p117
+\newcommand{\impi}[2]{$\imp_\intr$ #1--#2}
+\newcommand{\impe}[2]{$\imp_\elim$ #1, #2}
+
+% p118
+\newcommand{\negi}[2]{$\neg_\intr$ #1--#2}
+\newcommand{\nege}[2]{$\neg_\elim$ #1, #2}
+
+% p119
+\newcommand{\bote}[1]{$\bot_\elim$ #1}
+\newcommand{\nnege}[1]{$\neg\neg_\elim$ #1}
+
+% p120
+\newcommand{\nnegi}[1]{$\neg\neg_\intr$ #1}
+
+% 122
+\newcommand{\modt}[2]{$\mathit{MT}$ #1, #2}
+
+% 123
+\newcommand{\pbc}[2]{$\mathit{PBC}$ #1--#2}
+
+% 124
+\newcommand{\lem}{\ensuremath{\mathit{LEM}}}
+
+% formula logic
+\newcommand{\fneg}[1]{\ensuremath{\neg \left( #1 \right)}}
+\newcommand{\fland}[2]{\ensuremath{\left( #1 \right) \land \left( #2 \right)}}
+\newcommand{\flor}[2]{\ensuremath{\left( #1 \right) \lor \left( #2 \right)}}
+\newcommand{\fimp}[2]{\ensuremath{\left( #1 \right) \imp \left( #2 \right)}}
+
+% formula logic, parenthesis override
+\newcommand{\Fneg}[1]{\ensuremath{\neg #1}}
+\newcommand{\FlanD}[2]{\ensuremath{#1 \land #2}}
+\newcommand{\Fland}[2]{\ensuremath{#1 \land \left( #2 \right)}}
+\newcommand{\flanD}[2]{\ensuremath{\left( #1 \right) \land #2}}
+\newcommand{\FloR}[2]{\ensuremath{#1 \lor #2}}
+\newcommand{\Flor}[2]{\ensuremath{#1 \lor \left( #2 \right)}}
+\newcommand{\floR}[2]{\ensuremath{\left( #1 \right) \lor #2}}
+\newcommand{\FimP}[2]{\ensuremath{#1 \imp #2}}
+\newcommand{\Fimp}[2]{\ensuremath{#1 \imp \left( #2 \right)}}
+\newcommand{\fimP}[2]{\ensuremath{\left( #1 \right) \imp #2}}
+
+\edef\restoreparindent{\parindent=\the\parindent\relax}
+\usepackage{parskip}
+\restoreparindent
+
+\title{CMPE 58S: Sp. Tp. Computer Aided Verification \\ Homework II: Some Exercises}
+\date{2018 October 5}
+\author{Mehmet Utkan Gezer \\ 2018700060}
+
+\begin{document}
+\maketitle
+
+\section{Exercises from book}
+Following exercises are from the book ``Logic in Computer Science:
+Modelling and Reasoning about Systems'' by Michael Huth and Mark Ryan.
+
+\subsection{Exercise 1.2.1.x}   % Page 95
+Validity of the following is to be proven.
+$$
+p \imp (q \lor r), q \imp s, r \imp s \seq p \imp s
+$$
+
+Proof:
+\begin{logicproof}{2}
+    p \imp (q \lor r)   & premise\\
+    q \imp s            & premise\\
+    r \imp s            & premise\\
+    \begin{subproof}
+        p               & assumption\\
+        q \lor r        & \impe{1}{4}\\
+        \begin{subproof}
+            q           & assumption\\
+            s           & \impe{2}{6}
+        \end{subproof}
+        \begin{subproof}
+            r           & assumption\\
+            s           & \impe{3}{8}
+        \end{subproof}
+        s               & \lore{5}{6}{7}{8}{9}
+    \end{subproof}
+    p \imp s            & \impi{4}{10}
+\end{logicproof}
+
+\pagebreak
+\subsection{Exercise 1.2.2.d}   % Page 95
+Validity of the following is questioned.
+We claim it to be true, and prove it.
+$$
+p \lor q, \neg q \lor r \seq p \lor r
+$$
+
+Proof:
+\begin{logicproof}{2}
+    p \lor q                & premise\\
+    \neg q \lor r           & premise\\
+    q \lor \neg q           & \lem\\
+    \begin{subproof}
+        q                   & assumption\\
+        \begin{subproof}
+            \neg q          & assumption\\
+            \bot            & \nege{4}{5}\\
+            r               & \bote{6}
+        \end{subproof}
+        \begin{subproof}
+            r               & assumption
+        \end{subproof}
+        r                   & \lore{2}{5}{7}{8}{8}\\
+        p \lor r            & \loriy{9}
+    \end{subproof}
+    \begin{subproof}
+        \neg q              & assumption\\
+        \begin{subproof}
+            p               & assumption
+        \end{subproof}
+        \begin{subproof}
+            q               & assumption\\
+            \bot            & \nege{13}{11}\\
+            p               & \bote{14}
+        \end{subproof}
+        p                   & \lore{1}{12}{12}{13}{15}\\
+        p \lor r            & \lorix{16}
+    \end{subproof}
+    p \lor r                & \lore{3}{4}{10}{11}{17}
+\end{logicproof}
+
+\pagebreak
+\subsection{Exercise 1.2.3.q}   % Page 96
+Validity of the following is to be proven using \lem.
+$$
+\seq (p \imp q) \lor (q \imp r)
+$$
+
+Proof:
+\begin{logicproof}{2}
+    q \lor \neg q                   & \lem\\
+    \begin{subproof}
+        q                           & assumption\\
+        \begin{subproof}
+            p                       & assumption\\
+            q                       & \rep{2}
+        \end{subproof}
+        p \imp q                    & \impi{3}{4}\\
+        (p \imp q) \lor (q \imp r)  & \lorix{5}
+    \end{subproof}
+    \begin{subproof}
+        \neg q                      & assumption\\
+        \begin{subproof}
+            q                       & assumption\\
+            \bot                    & \nege{7}{8}\\
+            r                       & \bote{9}
+        \end{subproof}
+        q \imp r                    & \impi{8}{10}\\
+        (p \imp q) \lor (q \imp r)  & \loriy{11}
+    \end{subproof}
+    (p \imp q) \lor (q \imp r)      & \lore{1}{2}{6}{7}{12}
+\end{logicproof}
+
+\subsection{Exercise 1.3.4.b}   % Page 97
+Parse tree of the following formula is to be drawn:
+$$
+\floR{\FimP{\flor{\FimP{p}{\Fneg{q}}}{\FlanD{p}{r}}}{s}}{\Fneg{r}}
+$$
+
+The parse tree can be seen in Figure~\ref{fig:ex134b}.
+\begin{figure}[H]
+    \centering
+    \begin{forest}
+    for tree={circle, draw, l sep=10pt, s sep=20pt}
+    [$\lor$[$\imp$[$\lor$[$\imp$[$p$][$\neg$[$q$]]][$\land$[$p$][$r$]]][$s$]][$\neg$[$r$]]]
+    \end{forest}
+    \caption{Parse tree for the formula.}
+    \label{fig:ex134b}
+\end{figure}
+
+\subsection{Exercise 1.4.5} % Page 101
+Validity and satisfiability of the formula of
+the parse tree in Figure 1.10 on page 44 is asked.
+You can see the redrawn parse tree on Figure~\ref{fig:ex145}.
+
+\begin{figure}[H]
+    \centering
+    \begin{forest}
+    for tree={circle, draw, l sep=10pt, s sep=20pt}
+    [$\neg$[$\land$[$\imp$[$q$][$\neg$[$p$]]][$\imp$[$p$][$\lor$[$r$][$q$]]]]]
+    \end{forest}
+    \caption{Redrawn parse tree of Figure 1.10 on page 44.}
+    \label{fig:ex145}
+\end{figure}
+
+The formula of the parse tree is as follows:
+$$
+\fneg{\fland{\FimP{q}{\Fneg{p}}}{\Fimp{p}{\FloR{r}{q}}}}
+$$
+
+Using the semantic equivalence rules
+(elimination of implication, De Morgan's laws and
+elimination of double negation),
+we can transform this formula as follows:
+\begin{align*}
+&\equiv \fneg{\fland{\FloR{\Fneg{q}}{\Fneg{p}}}{\Flor{\Fneg{p}}{\FloR{r}{q}}}}%
+&&\text{(elimination of implication)}\\
+&\equiv \fneg{\fland{\FloR{\Fneg{q}}{\Fneg{p}}}{\Fneg{p} \lor r \lor q}}%
+&&\text{(elimination of parenthesis)}\\
+&\equiv \FloR{\fneg{\FloR{\Fneg{q}}{\Fneg{p}}}}{\fneg{\Fneg{p} \lor r \lor q}}%
+&&\text{(distribution of negation)}\\
+&\equiv \flor{\FlanD{\Fneg{\Fneg{q}}}{\Fneg{\Fneg{p}}}}{\Fneg{\Fneg{p}} \land \Fneg{r} \land \Fneg{q}}%
+&&\text{(distribution of negation)}\\
+&\equiv \flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}%
+&&\text{(elimination of double negation)}
+\end{align*}
+
+This is the DNF (Disjunctive Normal Form) of the initial formula.
+We then build the following partial truth table for the formula:
+
+$$
+\begin{array}{c|c|c||c|c|c}
+p      & q      & r      & \FlanD{q}{p} & p \land \Fneg{r} \land \Fneg{q} & \flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}\\\hline
+T      & T      & T      & T            & F                               & T\\
+\vdots & \vdots & \vdots & \vdots       & \vdots                          & \vdots\\
+F      & T      & T      & F            & F                               & F\\
+\vdots & \vdots & \vdots & \vdots       & \vdots                          & \vdots
+\end{array}
+$$
+
+With only those two lines of the truth table for the
+semantically equivalent formula
+$\flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}$
+we can say that
+$\fneg{\fland{\FimP{q}{\Fneg{p}}}{\Fimp{p}{\FloR{r}{q}}}}$
+is satisfiable, but not valid:
+\begin{itemize}
+\item
+\textbf{It is satisfiable}, because there exists an evaluation,
+namely $(p, q, r) = (T, T, T)$ for which
+the formula evaluates as $T$.
+\item
+\textbf{It is not valid}, and the proof for it is by contradiction.
+When we assume it is valid, it should follow that
+for all evaluations of the atoms the formula should
+evaluate to $T$. However, for the evaluation
+$(p, q, r) = (F, T, T)$, the formula evaluates as $F$,
+which is a contradiction.
+\end{itemize}
+
+
+\subsection{Exercise 1.5.4} % Page 103
+Soundness or completeness is to be used to show that
+a sequent $\phi_1, \phi_2, \dotsc, \phi_n \seq \psi$
+has a proof iff
+$\phi_1 \imp \phi_2 \imp \dotsb \imp \phi_n \imp \psi$
+is a tautology.
+
+The statement is not even correct, and we can show that using
+soundness and completeness and a proof by contradiction.
+
+Assume that the statement is true. The statement should be true
+for all $n$, so let $n = 2$. We then have a statement saying
+a sequent $\phi_1, \phi_2 \seq \psi$
+has a proof iff $\phi_1 \imp \phi_2 \imp \psi$
+is a tautology.
+
+By Remark 1.12, we can transform
+the original sequent $\phi_1, \phi_2 \seq \psi$
+as follows: $\seq \phi_1 \imp (\phi_2 \imp \psi)$.
+Let us now transform them both using semantic equivalence rules:
+\begin{align*}
+\phi_1 \imp (\phi_2 \imp \psi) &\equiv \neg\phi_1 \lor (\neg\phi_2 \lor \psi)  &  \phi_1 \imp \phi_2 \imp \psi &\equiv \neg\phi_1 \lor \phi_2 \imp \psi\\
+                               &\equiv \neg\phi_1 \lor \neg\phi_2 \lor \psi    &                               &\equiv \neg(\neg\phi_1 \lor \phi_2) \lor \psi\\
+                               &                                               &                               &\equiv (\neg\neg\phi_1 \land \neg\phi_2) \lor \psi\\
+                               &                                               &                               &\equiv (\phi_1 \land \neg\phi_2) \lor \psi\\
+                               &                                               &                               &\equiv (\phi_1 \lor \psi) \land (\neg\phi_2 \lor \psi)
+\end{align*}
+
+By the statement assumed to be true, if the original sequent,
+or equivalently its transformed form, or equivalently
+its semantic equivalent has a proof, then the second formula,
+or its semantic equivalent should be a tautology. Let us now
+prepare their truth tables:
+$$
+\begin{array}{c|c|c||c|c}
+\phi_1 & \phi_2 & \psi & \neg \phi_1 \lor \neg \phi_2 \lor \psi & (\phi_1 \lor \psi) \land (\neg\phi_2 \lor \psi) \\\hline
+T      & T      & T    & T                                      & T\\
+T      & T      & F    & F                                      & F\\
+T      & F      & T    & T                                      & T\\
+T      & F      & F    & T                                      & T\\
+F      & T      & T    & T                                      & T\\
+\rowcolor{Red}
+F      & T      & F    & T                                      & F\\
+F      & F      & T    & T                                      & T\\
+\rowcolor{Red}
+F      & F      & F    & T                                      & F
+\end{array}
+$$
+
+On the truth table, we can clearly see that there are
+cases (highlighted in red) where sequent has a proof,
+yet the formula is not a tautology.
+This is a contradiction, meaning that our assumption
+was wrong. Statement that a sequent
+$\phi_1, \phi_2, \dotsc, \phi_n \seq \psi$ has a proof iff
+$\phi_1 \imp \phi_2 \imp \dotsb \imp \phi_n \imp \psi$
+is a tautology, is not true.
+
+\section{Classification of formulas}
+Following formulas are to be classified as valid, satisfiable, or
+not satisfiable, using the semantic method.
+
+\subsection{An implication}
+The formula is as follows:
+$$
+\neg q \imp q
+$$
+
+We can transform it into the CNF form:
+\begin{align*}
+&\equiv \neg\neg q \lor q\\
+&\equiv q \lor q
+\end{align*}
+
+By Lemma 1.43, a disjunction of literals
+$L_1 \lor L_2 \lor \dotsb \lor L_m$ is valid iff there are
+$1 \leq i, j \leq m$ such that $L_i$ is $\neg L_j$.
+Since $q \lor q$ has no such pair of literals,
+this disjunction of literals is \textbf{not valid}.
+
+Proposition 1.45 states that a formula is satisfiable iff
+its negation is not valid. Negation of our formula is
+$\fneg{q \lor q}$, and in CNF form:
+\begin{align*}
+&\equiv \neg q \land \neg q
+\end{align*}
+
+The resulting formula is the conjunction of two identical
+disjunction of literals that consist of a single literal.
+Since there is no pair of literals of form $L_i = \neg L_j$ in
+$\neg q$, the negated formula is not valid by Lemma 1.43, and therefore
+our original formula is \textbf{satisfiable} by Proposition 1.45.
+
+\subsection{A conjunction}
+The formula is as follows:
+$$
+\fland{\neg q \imp q}{q \imp \neg q}
+$$
+
+We can transform it into the CNF form:
+\begin{align*}
+&\equiv \fland{\neg\neg q \lor q}{\neg q \lor \neg q}\\
+&\equiv \fland{q \lor q}{\neg q \lor \neg q}
+\end{align*}
+
+For the formula to be valid, both the $q \lor q$ and
+$\neg q \lor \neg q$ needs to be valid. However, as proven in
+the previous exercise, former is not valid, therefore the
+formula is also \textbf{not valid}.
+
+The negation of the formula is:
+$$
+\fneg{\fland{q \lor q}{\neg q \lor \neg q}}.
+$$
+
+We can transform it into the CNF form:
+\begin{align*}
+&\equiv \FloR{\fneg{q \lor q}}{\fneg{\neg q \lor \neg q}}\\
+&\equiv \flor{\neg q \land \neg q}{\neg\neg q \land \neg\neg q}\\
+&\equiv \flor{\neg q \land \neg q}{q \land q}\\
+&\equiv \fland{\floR{\neg q \land \neg q}{q}}{\floR{\neg q \land \neg q}{q}}\\
+&\equiv \fland{\fland{\neg q \lor q}{\neg q \lor q}}{\fland{\neg q \lor q}{\neg q \lor q}}\\
+&\equiv \FlanD{\fland{\neg q \lor q}{\neg q \lor q}}{\fland{\neg q \lor q}{\neg q \lor q}}
+\end{align*}
+
+The resulting formula is the conjunction of 4 identical
+disjunction of literals that consist of $q$ and $\neg q$.
+Since $L_i = q$ and $L_j = \neg q$ is of the form $L_i = \neg L_j$
+it is valid, and therefore all 4 of them are valid, and consequently
+the negated formula is also valid.
+
+By Proposition 1.45, negated formula being valid means that
+the original formula is \textbf{not satisfiable}.
+
+\end{document}
