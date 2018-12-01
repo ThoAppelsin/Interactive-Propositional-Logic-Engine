@@ -214,6 +214,8 @@ such that;
 		assumption box must not have been closed, yet.
 \end{itemize}
 
+We refer to such proof steps as the \textit{accessible steps}.
+
 A proof of a sequent is complete when the conclusion of the
 sequent is established using only the rules of natural deduction and
 starting off with only the premises of the sequent. It is important to
@@ -255,8 +257,28 @@ our program, given in sequents:
 		& $\boxed{\neg\phi \dotsb \bot} \vdash \phi$\nll
 		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
 		& $\vdash \phi \lor \neg\phi$
+		\multicolumn{2}{l|}{Copy}
+		& $\vdash \phi \vdash \phi$
 	\end{tabular}
 \end{center}
+
+The boxed premises such as $\boxed{\phi \dotsb \psi}$ on
+implication introduction, is an assumption box in the proof
+that starts right before the proposition $\phi$ and ends right
+after the proposition $\psi$. 
+To make step on the proof, one of the proof rules given
+above must be used. To use a rule, we need accessible propositions
+and/or assumption boxes that fits to the rule's sequent's propositions.
+Only if we are able to fulfill the \textit{requirements} of the rule,
+we then may establish the validity of a new proposition according
+to the definition of the rule, and specifically the rule's sequent's
+conclusion. In natural deduction, this is the only way to
+make a proof step and approach to the ultimate conclusion.
+
+Accessibility of an assumption box is defined similar to the
+accessibility of individual proof steps. This time, not a single
+step but the assumption box as a whole should be accessible as a
+single entity.
 
 \section{Exercises from book}
 Following exercises are from the book ``Logic in Computer Science:
