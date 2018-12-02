@@ -243,7 +243,7 @@ our program, given in sequents:
 			\boxed{\psi \dotsb \chi} \vdash \chi$\nll
 		\multirow{2}{*}{Implication}
 		& Introduction & $\boxed{\phi \dotsb \psi} \vdash \phi \implies \psi$\nl
-		& Elimination  & $\phi, \phi \implies \psi \vdash \psi$\nll
+		& Elimination  & $\phi \implies \psi, \phi \vdash \psi$\nll
 		\multirow{2}{*}{Negation}
 		& Introduction & $\boxed{\phi \dotsb \bot} \vdash \neg\phi$\nl
 		& Elimination  & $\phi, \neg\phi \vdash \bot$\nll
@@ -280,6 +280,88 @@ Accessibility of an assumption box is defined similar to the
 accessibility of individual proof steps. This time, not a single
 step but the assumption box as a whole should be accessible as a
 single entity.
+
+A proof step is a declaration, and should have a \textit{rationale}
+stated next to it. Following is a complete list of valid rationales
+for a proof step:
+\begin{center}
+	\begin{tabular}{r l}
+		\textbf{Rationale} & \textbf{Can be used next to propositions which...}\\
+		Premise: & ... are found in the premises of the sequent to be proved.\\
+		Proof rule: & ... that fit to the conclusion of a proof rule, and only if the
+			corresponding premises of that proof rule is available and validated in a
+			previous step. Those steps must be referenced in the rationale in the
+			same order as they appear in the proof rule.\\
+		Assumption: & ... appear as the first proof step of an assumption box.
+	\end{tabular}
+\end{center}
+
+Here is an example of a proof for the sequent
+$p \lor q, \neg q \lor r \seq p \lor r$:
+
+\begin{logicproof}{2}
+    p \lor q                & premise\\
+    \neg q \lor r           & premise\\
+    q \lor \neg q           & \lem\\
+    \begin{subproof}
+        q                   & assumption\\
+        \begin{subproof}
+            \neg q          & assumption\\
+            \bot            & \nege{4}{5}\\
+            r               & \bote{6}
+        \end{subproof}
+        \begin{subproof}
+            r               & assumption
+        \end{subproof}
+        r                   & \lore{2}{5}{7}{8}{8}\\
+        p \lor r            & \loriy{9}
+    \end{subproof}
+    \begin{subproof}
+        \neg q              & assumption\\
+        \begin{subproof}
+            p               & assumption
+        \end{subproof}
+        \begin{subproof}
+            q               & assumption\\
+            \bot            & \nege{13}{11}\\
+            p               & \bote{14}
+        \end{subproof}
+        p                   & \lore{1}{12}{12}{13}{15}\\
+        p \lor r            & \lorix{16}
+    \end{subproof}
+    p \lor r                & \lore{3}{4}{10}{11}{17}
+\end{logicproof}
+
+And here are remarks on this proof:
+\begin{enumerate}
+	\item Note that on step \#3, we use the rule \lem{} without
+		any argument. It really does not depend on any one of the
+		previous steps, however, it actually has an argument $q$,
+		which is the reason why it is a rationale for $q \lor \neg q$
+		and not $\neg r \lor \neg\neg r$.
+	\item Note the order of arguments on step \#14. With respect to the
+		rule of negation elimination ($\neg_\elim$), second of its two
+		arguments must be the negation-applied of the first one, which
+		is why we first refer to $q$ and then $\neg q$, and not the other
+		way around. Also note that negation-applied is not the same
+		as negation-discarded, although they semantically have the same meaning.
+	\item Note how assumption boxes are referred to with ranges, i.e.
+		the starting index, followed by a dash, and followed by the ending index.
+\end{enumerate}
+
+Hereby we conclude with our definitions on propositional logic
+and natural deduction, and also our introduction.
+
+\section{Interactive Propositional Logic Engine using Natural Deduction}
+
+A propositional logic engine is a machine that works with propositional
+logic as its substance. One that works with the methods of natural
+deduction, is a propositional logic engine using natural deduction.
+With this project, we propose an interactive propositional logic engine
+using natural deduction.
+
+Our product is a software that allows its user to build up valid proofs
+for any given propositional logic sequent. 
 
 \section{Exercises from book}
 Following exercises are from the book ``Logic in Computer Science:
