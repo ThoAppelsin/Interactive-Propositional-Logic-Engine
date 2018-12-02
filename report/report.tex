@@ -3,7 +3,8 @@
 \usepackage{backnaur}
 \usepackage{multirow}
 \usepackage{hhline}
-
+\usepackage{setspace}
+\doublespacing
 
 \renewcommand{\bnfpo}{\Coloneqq}
 
@@ -226,9 +227,9 @@ Here is a list of all natural deduction rules we have embedded into
 our program, given in sequents:
 
 \begin{center}
-	\renewcommand{\arraystretch}{1.4}
-	\newcommand{\nl}{\\[2pt]}
-	\newcommand{\nll}{\\[2pt]\hline}
+	\renewcommand{\arraystretch}{1.2}
+	\newcommand{\nl}{\\[4pt]}
+	\newcommand{\nll}{\\[4pt]\hline}
 	\begin{tabular}{l l|l}
 		\multicolumn{2}{l|}{\textbf{Name}} & \textbf{Rule}\\\hhline{==|=}
 		\multirow{3}{*}{Conjunction}
@@ -256,9 +257,9 @@ our program, given in sequents:
 		\multicolumn{2}{l|}{PBC (Proof by Contraditcion)}
 		& $\boxed{\neg\phi \dotsb \bot} \vdash \phi$\nll
 		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
-		& $\vdash \phi \lor \neg\phi$
+		& $\vdash \phi \lor \neg\phi$\nll
 		\multicolumn{2}{l|}{Copy}
-		& $\vdash \phi \vdash \phi$
+		& $\phi \vdash \phi$
 	\end{tabular}
 \end{center}
 
