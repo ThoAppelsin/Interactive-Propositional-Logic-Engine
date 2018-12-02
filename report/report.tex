@@ -100,7 +100,7 @@ propositions.
 For a more detailed introduction, we will be giving some definitions for
 propositions and natural deduction, along with its semantics.
 
-\subsection{Propositions}
+\subsection{Propositions}\label{sec:intr_prop}
 
 Propositions are declarative
 sentences with a truth value either \true{} or \false{},
@@ -354,14 +354,108 @@ and natural deduction, and also our introduction.
 
 \section{Interactive Propositional Logic Engine using Natural Deduction}
 
-A propositional logic engine is a machine that works with propositional
-logic as its substance. One that works with the methods of natural
-deduction, is a propositional logic engine using natural deduction.
-With this project, we propose an interactive propositional logic engine
+A \textit{propositional logic engine} is an abstract machine that
+works with propositional logic as its substance. One that works
+with the methods of natural deduction, is a propositional logic
+engine \textit{using natural deduction}. With this project,
+we propose an \textit{interactive} propositional logic engine
 using natural deduction.
 
 Our product is a software that allows its user to build up valid proofs
-for any given propositional logic sequent. 
+for any given propositional logic sequent. By stating the rule they
+want to use and specifying the arguments that want to use it with,
+users can establish the truth of newer propositions and get them added
+to the proof as a step. The proof rules are embedded into the software,
+ensuring the validity of the proof throughout the execution.
+
+The software comes with a command-line interface, which is a REPL%
+\footnote{\textbf{R}ead \textbf{E}val \textbf{P}rint \textbf{L}oop}
+that reads user input for proof rules, parses and evaluates it, and
+re-draws the working proof to the console window, in a loop. The
+loop ends when the conclusion of the initially input sequent is reached.
+
+In the following subsections, we will be giving out more details on
+software's workflow, its the input specifications and some of its
+inner mechanisms. We will also mention some of its software design
+aspects, some of which have been made possible (with ease) of the
+programming language Julia.
+
+\subsection{Workflow}
+
+At all times, the program greets the user with the title same as the
+name of the project, ``Interactive Propositional Logic Engine using
+Natural Deduction''. Initially, the program asks user to provide
+a sequent that is to be proven.
+
+After being provided a sequent, the program enters the proof mode,
+where it will start displaying a working proof structure with step
+numbers and box visualizations with ASCII box characters for the
+assumption boxes. In this mode, the user is repeatedly asked to
+provide a natural deduction rule to apply. With the provided
+natural deduction rule, along with its parameters, the software
+will do either one of the following:
+\begin{itemize}
+	\item If the rule is applicable to the given arguments, it will
+		add the proposition, validity of which has been established
+		using the provided proof rule with the given arguments, and
+		then re-draw the proof with the new step on the proof.
+	\item If the rule is malformed:
+		\begin{itemize}
+			\item The program may ask the user to re-consider their
+				input, or
+			\item The program may fail and exit.
+		\end{itemize}
+\end{itemize}
+
+The program is designed to apply a properly provided natural
+deduction rule, and only apply a properly provided natural deduction
+rule. However, as stated above, it may fail to recover promptly
+and ask for the user to retry if an input is malformed.
+
+Apart from the natural deduction rules with their parameters,
+some other keyword statements can be provided to the program
+to perform the closure of an assumption box, and, for user's
+convenience, to undo the last action.
+
+When a proof step with the proposition exactly the same as in the
+conclusion of the initially provided sequent and outside all of
+the assumption boxes, the program than declares success and
+exits. This concludes the workflow of the program, and also this
+subsection.
+
+\subsection{Input Specifications}
+
+Our program accepts 3 different category of inputs:
+Propositions, sequents, and natural deduction rules
+with their arguments. We will provide their specifications
+separately for a more structured view.
+
+\subsubsection{Propositions}
+
+Refer to the Subsection~\ref{sec:intr_prop} for the BNF specification
+for the well-formed formulas on propositions. As stated before
+in that subsection, we will not expect the user-provided formulas
+to be well-formed, and tolerantly accept propositions according
+to precedence rules described in again the same section.
+
+In general, and with respect to the BNF specification, a proposition
+consists of atoms, negation, conjunction, disjunction, and implication
+symbols, and finally parenthesis. We extend this to accommodate the
+constants for tautology and disjunction to also be valid propositions.
+
+% TODO
+
+
+
+Refer to the section Introduction
+and its subsection Natural Deduction for the definitions of a
+sequent.
+
+
+
+The software is intended to be used as a stand-alone command-line
+application. However, with only some minor modifications, it can be turned
+into a back-end engine for any other application.
 
 \section{Exercises from book}
 Following exercises are from the book ``Logic in Computer Science:
