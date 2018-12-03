@@ -3,6 +3,7 @@
 \usepackage{backnaur}
 \usepackage{multirow}
 \usepackage{hhline}
+\usepackage{textgreek}
 \usepackage{setspace}
 \doublespacing
 
@@ -183,7 +184,7 @@ case a proposition like $p \lor q \land r$ should either be regarded
 as unintelligible, or the same as $((p \lor q) \land r)$.
 We will be adhering to the above listed convention.
 
-\subsection{Natural deduction}
+\subsection{Natural deduction}\label{sec:intr_nd}
 
 Natural deduction is a way of reasoning about a given set of propositions
 and inferring new ones from them. Using a collection of \textit{proof rules},
@@ -369,7 +370,7 @@ to the proof as a step. The proof rules are embedded into the software,
 ensuring the validity of the proof throughout the execution.
 
 The software comes with a command-line interface, which is a REPL%
-\footnote{\textbf{R}ead \textbf{E}val \textbf{P}rint \textbf{L}oop}
+\footnote{Read-Eval-Print-Loop}
 that reads user input for proof rules, parses and evaluates it, and
 re-draws the working proof to the console window, in a loop. The
 loop ends when the conclusion of the initially input sequent is reached.
@@ -426,7 +427,7 @@ subsection.
 \subsection{Input Specifications}
 
 Our program accepts 3 different category of inputs:
-Propositions, sequents, and natural deduction rules
+Propositions, sequents, and natural deduction statements
 with their arguments. We will provide their specifications
 separately for a more structured view.
 
@@ -466,355 +467,167 @@ originals:
 	\end{tabular}
 \end{center}
 
-Atomic propositions symbolized with a single letter is simply to be input
-by that letter, and the ones with numbers in their subscripts may have
-their numbers right next to them, but not as a subscript, as they are
-input to the program. More specifically, all the atoms should be in the
-form of the following regular expression:
+Atomic propositions which are symbolized with a single letter should simply
+be input using that letter. Atoms with a subscript number should have their
+number appended right next to them, and not as a subscript. More specifically,
+all the atoms should be in the form of the following regular expression:
 
 \begin{center}
 \verb|[a-z][0-9]*|
 \end{center}
 
+There can be as many spaces around the tokens as the user feels like,
+as well as no space at all. A couple of example propositions our program
+would accept are as follows:
+
+% TODO
+TODO EXAMPLES
+
+\subsubsection{Sequents}
+
+Refer to the section Introduction and its Subsection~\ref{sec:intr_nd}
+for the definitions of a sequent. Recall that a sequent with no premises
+is also a valid sequent, also known as a theorem.
+
+List of premises in a sequent are to be separated with commas (\verb|,|)
+in our program, just like we do it on paper. The symbol $\vdash$ should
+be substituted by \verb|=>|.  If the user desires to provide a theorem,
+the sequent symbol \verb|=>| can also be omitted altogether.
+
+Conclusion of the sequent may not be omitted, as it is essential for a
+sequent. However, if the user desires to use the program for natural deduction
+without any pre-destined conclusion, he or she may simply provide an unattainable
+conclusion, such as an atomic proposition \verb|q1234| that does not take place
+in any one of the premises. This should allow them to run the program
+indefinitely, as it should be impossible for them to establish the validity
+of an atomic proposition that does not exist in any one of the premises.
+
+As with the propositions, there can be as many spaces around the tokens as
+the user feels like, as well as no space at all. A couple of example sequents
+our program would accept are as follows:
 % TODO
 
+\subsubsection{Natural deduction statements}
 
+\textit{Natural deduction rules} have no syntax, but they are rather rules to be
+applied to true propositions in order to establish the truth of newer ones. When a
+proposition is introduced using a natural deduction rule, however, we have to
+specify the rule as a rationale next to that proposition in a very specific way.
 
-Refer to the section Introduction
-and its subsection Natural Deduction for the definitions of a
-sequent.
+\newcommand{\AN}{\texttt{\#}}
+\newcommand{\AR}{\texttt{\#-\#}}
+\newcommand{\AF}{\texttt{\textphi}}
 
-
-
-The software is intended to be used as a stand-alone command-line
-application. However, with only some minor modifications, it can be turned
-into a back-end engine for any other application.
-
-\section{Exercises from book}
-Following exercises are from the book ``Logic in Computer Science:
-Modelling and Reasoning about Systems'' by Michael Huth and Mark Ryan.
-
-\subsection{Exercise 1.2.1.x}   % Page 95
-Validity of the following is to be proven.
-$$
-p \imp (q \lor r), q \imp s, r \imp s \seq p \imp s
-$$
-
-Proof:
-\begin{logicproof}{2}
-    p \imp (q \lor r)   & premise\\
-    q \imp s            & premise\\
-    r \imp s            & premise\\
-    \begin{subproof}
-        p               & assumption\\
-        q \lor r        & \impe{1}{4}\\
-        \begin{subproof}
-            q           & assumption\\
-            s           & \impe{2}{6}
-        \end{subproof}
-        \begin{subproof}
-            r           & assumption\\
-            s           & \impe{3}{8}
-        \end{subproof}
-        s               & \lore{5}{6}{7}{8}{9}
-    \end{subproof}
-    p \imp s            & \impi{4}{10}
-\end{logicproof}
-
-\pagebreak
-\subsection{Exercise 1.2.2.d}   % Page 95
-Validity of the following is questioned.
-We claim it to be true, and prove it.
-$$
-p \lor q, \neg q \lor r \seq p \lor r
-$$
-
-Proof:
-\begin{logicproof}{2}
-    p \lor q                & premise\\
-    \neg q \lor r           & premise\\
-    q \lor \neg q           & \lem\\
-    \begin{subproof}
-        q                   & assumption\\
-        \begin{subproof}
-            \neg q          & assumption\\
-            \bot            & \nege{4}{5}\\
-            r               & \bote{6}
-        \end{subproof}
-        \begin{subproof}
-            r               & assumption
-        \end{subproof}
-        r                   & \lore{2}{5}{7}{8}{8}\\
-        p \lor r            & \loriy{9}
-    \end{subproof}
-    \begin{subproof}
-        \neg q              & assumption\\
-        \begin{subproof}
-            p               & assumption
-        \end{subproof}
-        \begin{subproof}
-            q               & assumption\\
-            \bot            & \nege{13}{11}\\
-            p               & \bote{14}
-        \end{subproof}
-        p                   & \lore{1}{12}{12}{13}{15}\\
-        p \lor r            & \lorix{16}
-    \end{subproof}
-    p \lor r                & \lore{3}{4}{10}{11}{17}
-\end{logicproof}
-
-\pagebreak
-\subsection{Exercise 1.2.3.q}   % Page 96
-Validity of the following is to be proven using \lem.
-$$
-\seq (p \imp q) \lor (q \imp r)
-$$
-
-Proof:
-\begin{logicproof}{2}
-    q \lor \neg q                   & \lem\\
-    \begin{subproof}
-        q                           & assumption\\
-        \begin{subproof}
-            p                       & assumption\\
-            q                       & \rep{2}
-        \end{subproof}
-        p \imp q                    & \impi{3}{4}\\
-        (p \imp q) \lor (q \imp r)  & \lorix{5}
-    \end{subproof}
-    \begin{subproof}
-        \neg q                      & assumption\\
-        \begin{subproof}
-            q                       & assumption\\
-            \bot                    & \nege{7}{8}\\
-            r                       & \bote{9}
-        \end{subproof}
-        q \imp r                    & \impi{8}{10}\\
-        (p \imp q) \lor (q \imp r)  & \loriy{11}
-    \end{subproof}
-    (p \imp q) \lor (q \imp r)      & \lore{1}{2}{6}{7}{12}
-\end{logicproof}
-
-\subsection{Exercise 1.3.4.b}   % Page 97
-Parse tree of the following formula is to be drawn:
-$$
-\floR{\FimP{\flor{\FimP{p}{\Fneg{q}}}{\FlanD{p}{r}}}{s}}{\Fneg{r}}
-$$
-
-The parse tree can be seen in Figure~\ref{fig:ex134b}.
-\begin{figure}[H]
-    \centering
-    \begin{forest}
-    for tree={circle, draw, l sep=10pt, s sep=20pt}
-    [$\lor$[$\imp$[$\lor$[$\imp$[$p$][$\neg$[$q$]]][$\land$[$p$][$r$]]][$s$]][$\neg$[$r$]]]
-    \end{forest}
-    \caption{Parse tree for the formula.}
-    \label{fig:ex134b}
-\end{figure}
-
-\subsection{Exercise 1.4.5} % Page 101
-Validity and satisfiability of the formula of
-the parse tree in Figure 1.10 on page 44 is asked.
-You can see the redrawn parse tree on Figure~\ref{fig:ex145}.
-
-\begin{figure}[H]
-    \centering
-    \begin{forest}
-    for tree={circle, draw, l sep=10pt, s sep=20pt}
-    [$\neg$[$\land$[$\imp$[$q$][$\neg$[$p$]]][$\imp$[$p$][$\lor$[$r$][$q$]]]]]
-    \end{forest}
-    \caption{Redrawn parse tree of Figure 1.10 on page 44.}
-    \label{fig:ex145}
-\end{figure}
-
-The formula of the parse tree is as follows:
-$$
-\fneg{\fland{\FimP{q}{\Fneg{p}}}{\Fimp{p}{\FloR{r}{q}}}}
-$$
-
-Using the semantic equivalence rules
-(elimination of implication, De Morgan's laws and
-elimination of double negation),
-we can transform this formula as follows:
-\begin{align*}
-&\equiv \fneg{\fland{\FloR{\Fneg{q}}{\Fneg{p}}}{\Flor{\Fneg{p}}{\FloR{r}{q}}}}%
-&&\text{(elimination of implication)}\\
-&\equiv \fneg{\fland{\FloR{\Fneg{q}}{\Fneg{p}}}{\Fneg{p} \lor r \lor q}}%
-&&\text{(elimination of parenthesis)}\\
-&\equiv \FloR{\fneg{\FloR{\Fneg{q}}{\Fneg{p}}}}{\fneg{\Fneg{p} \lor r \lor q}}%
-&&\text{(distribution of negation)}\\
-&\equiv \flor{\FlanD{\Fneg{\Fneg{q}}}{\Fneg{\Fneg{p}}}}{\Fneg{\Fneg{p}} \land \Fneg{r} \land \Fneg{q}}%
-&&\text{(distribution of negation)}\\
-&\equiv \flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}%
-&&\text{(elimination of double negation)}
-\end{align*}
-
-This is the DNF (Disjunctive Normal Form) of the initial formula.
-We then build the following partial truth table for the formula:
-
-$$
-\begin{array}{c|c|c||c|c|c}
-p      & q      & r      & \FlanD{q}{p} & p \land \Fneg{r} \land \Fneg{q} & \flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}\\\hline
-T      & T      & T      & T            & F                               & T\\
-\vdots & \vdots & \vdots & \vdots       & \vdots                          & \vdots\\
-F      & T      & T      & F            & F                               & F\\
-\vdots & \vdots & \vdots & \vdots       & \vdots                          & \vdots
-\end{array}
-$$
-
-With only those two lines of the truth table for the
-semantically equivalent formula
-$\flor{\FlanD{q}{p}}{p \land \Fneg{r} \land \Fneg{q}}$
-we can say that
-$\fneg{\fland{\FimP{q}{\Fneg{p}}}{\Fimp{p}{\FloR{r}{q}}}}$
-is satisfiable, but not valid:
+In our program, we adopt this rationale syntax, as we expect user to provide
+\textit{natural deduction statements}. In general, a natural deduction statement
+should start with the identifier of the corresponding natural deduction rule,
+followed by the list of parameters it takes. Here, parameters are either one of
+the following three:
 \begin{itemize}
-\item
-\textbf{It is satisfiable}, because there exists an evaluation,
-namely $(p, q, r) = (T, T, T)$ for which
-the formula evaluates as $T$.
-\item
-\textbf{It is not valid}, and the proof for it is by contradiction.
-When we assume it is valid, it should follow that
-for all evaluations of the atoms the formula should
-evaluate to $T$. However, for the evaluation
-$(p, q, r) = (F, T, T)$, the formula evaluates as $F$,
-which is a contradiction.
+	\item Line number, with the placeholder \AN.
+	\item An interval of line numbers, with the placeholder \AR.
+	\item A proposition, with the placeholder \AF.
 \end{itemize}
 
+The following table specifies all of the natural deduction statements that our
+program accepts: First two columns are the names of the statements, and corresponds
+to the names of the natural deduction rules. The next column is the identifier for
+the statement, and the following columns are placeholders for one of the three
+different types of parameters as listed above.
 
-\subsection{Exercise 1.5.4} % Page 103
-Soundness or completeness is to be used to show that
-a sequent $\phi_1, \phi_2, \dotsc, \phi_n \seq \psi$
-has a proof iff
-$\phi_1 \imp \phi_2 \imp \dotsb \imp \phi_n \imp \psi$
-is a tautology.
+The last 3 statements on the table are the only ones that do not have a corresponding
+natural deduction rule. First two are there to open and close assumption boxes,
+and the last one is for the convenience of the user, allowing them to undo the effects
+of the last (non-\verb|undo|) statement they have provided.
 
-The statement is not even correct, and we can show that using
-soundness and completeness and a proof by contradiction.
+\begin{center}
+	\renewcommand{\arraystretch}{1}
+	\begin{tabular}{l l|l|l l l}
+		\multicolumn{2}{l|}{\multirow{2}{*}{\textbf{Name}}}
+		& \multirow{2}{*}{\textbf{Identifier}}
+		& \multicolumn{3}{c}{\textbf{\underline{Arguments}}} \\
+		& &
+		& \textbf{\#1}
+		& \textbf{\#2}
+		& \textbf{\#3}\\\hhline{==|=|===}
+		\multirow{3}{*}{Conjunction}
+		& Introduction    & \verb|andi|  & \AN & & \\
+		& Elimination \#1 & \verb|ande1| & \AN & & \\
+		& Elimination \#2 & \verb|ande2| & \AN & & \\\hline
+		\multirow{3}{*}{Disjunction}
+		& Introduction \#1 & \verb|ori1| & \AN & \AF & \\
+		& Introduction \#2 & \verb|ori1| & \AN & \AF & \\
+		& Elimination      & \verb|ori1| & \AN & \AR & \AR \\\hline
+		\multirow{2}{*}{Implication}
+		& Introduction & \verb|impi| & \AR & & \\
+		& Elimination  & \verb|impe| & \AN & \AN & \\\hline
+		\multirow{2}{*}{Negation}
+		& Introduction & \verb|negi| & \AR & & \\
+		& Elimination  & \verb|nege| & \AN & \AN & \\\hline
+		\multirow{1}{*}{\false{}}
+		& Elimination  & \verb|bote| & \AN & \AF & \\\hline
+		\multirow{2}{*}{Double negation}
+		& Introduction & \verb|negnegi| & \AN & & \\
+		& Elimination  & \verb|negnege| & \AN & & \\\hline
+		\multicolumn{2}{l|}{MT (Modus Tollens)}
+		& \verb|MT| & \AN & \AN & \\\hline
+		\multicolumn{2}{l|}{PBC (Proof by Contraditcion)}
+		& \verb|PBC| & \AR & & \\\hline
+		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
+		& \verb|LEM| & \AF & & \\\hline
+		\multicolumn{2}{l|}{Copy}
+		& \verb|copy| & \AN & & \\\hline
+		\multicolumn{2}{l|}{Assume}
+		& \verb|assume| & \AF & & \\\hline
+		\multicolumn{2}{l|}{Conclude}
+		& \verb|conclude| & & & \\\hline
+		\multicolumn{2}{l|}{Undo}
+		& \verb|undo| & & &
+	\end{tabular}
+\end{center}
 
-Assume that the statement is true. The statement should be true
-for all $n$, so let $n = 2$. We then have a statement saying
-a sequent $\phi_1, \phi_2 \seq \psi$
-has a proof iff $\phi_1 \imp \phi_2 \imp \psi$
-is a tautology.
+The \AN{} should be replaced by a single line number out of one of the
+line numbers that are present in the working proof so far. \AR{} should
+be replaced by two line numbers separated by a dash (\verb|-|), where
+the first line number should be of the line right after the start of
+an assumption box opening line, and the second line number should be of
+the line right before the end of an assumption box closing line. 
+The \AF{} should be replaced by any proposition, as previously described
+at the propositions' input specification.
 
-By Remark 1.12, we can transform
-the original sequent $\phi_1, \phi_2 \seq \psi$
-as follows: $\seq \phi_1 \imp (\phi_2 \imp \psi)$.
-Let us now transform them both using semantic equivalence rules:
-\begin{align*}
-\phi_1 \imp (\phi_2 \imp \psi) &\equiv \neg\phi_1 \lor (\neg\phi_2 \lor \psi)  &  \phi_1 \imp \phi_2 \imp \psi &\equiv \neg\phi_1 \lor \phi_2 \imp \psi\\
-                               &\equiv \neg\phi_1 \lor \neg\phi_2 \lor \psi    &                               &\equiv \neg(\neg\phi_1 \lor \phi_2) \lor \psi\\
-                               &                                               &                               &\equiv (\neg\neg\phi_1 \land \neg\phi_2) \lor \psi\\
-                               &                                               &                               &\equiv (\phi_1 \land \neg\phi_2) \lor \psi\\
-                               &                                               &                               &\equiv (\phi_1 \lor \psi) \land (\neg\phi_2 \lor \psi)
-\end{align*}
+The user may separate the identifier from the first argument either with
+one or more space characters (\verb| |), or a comma (\verb|,|)
+with any amount of space characters around it. The arguments should also
+be separated from each other in a similar fashion.
 
-By the statement assumed to be true, if the original sequent,
-or equivalently its transformed form, or equivalently
-its semantic equivalent has a proof, then the second formula,
-or its semantic equivalent should be a tautology. Let us now
-prepare their truth tables:
-$$
-\begin{array}{c|c|c||c|c}
-\phi_1 & \phi_2 & \psi & \neg \phi_1 \lor \neg \phi_2 \lor \psi & (\phi_1 \lor \psi) \land (\neg\phi_2 \lor \psi) \\\hline
-T      & T      & T    & T                                      & T\\
-T      & T      & F    & F                                      & F\\
-T      & F      & T    & T                                      & T\\
-T      & F      & F    & T                                      & T\\
-F      & T      & T    & T                                      & T\\
-\rowcolor{Red}
-F      & T      & F    & T                                      & F\\
-F      & F      & T    & T                                      & T\\
-\rowcolor{Red}
-F      & F      & F    & T                                      & F
-\end{array}
-$$
+All the arguments are necessary, and the program will not proceed when
+they are missing. Program tolerates the natural deduction statement input
+when the user forgets to provide the necessary \AF{} argument, by letting
+the user try again. However, forgetting to provide other types of arguments,
+or providing different types of arguments than necessary, may possibly not
+be tolerated and result in an error and therefore termination of execution.
 
-On the truth table, we can clearly see that there are
-cases (highlighted in red) where sequent has a proof,
-yet the formula is not a tautology.
-This is a contradiction, meaning that our assumption
-was wrong. Statement that a sequent
-$\phi_1, \phi_2, \dotsc, \phi_n \seq \psi$ has a proof iff
-$\phi_1 \imp \phi_2 \imp \dotsb \imp \phi_n \imp \psi$
-is a tautology, is not true.
+We provide the following example natural deduction statements accepted by
+our program:
 
-\section{Classification of formulas}
-Following formulas are to be classified as valid, satisfiable, or
-not satisfiable, using the semantic method.
+% TODO
 
-\subsection{An implication}
-The formula is as follows:
-$$
-\neg q \imp q
-$$
+\section{Example execution}
 
-We can transform it into the CNF form:
-\begin{align*}
-&\equiv \neg\neg q \lor q\\
-&\equiv q \lor q
-\end{align*}
+% TODO
 
-By Lemma 1.43, a disjunction of literals
-$L_1 \lor L_2 \lor \dotsb \lor L_m$ is valid iff there are
-$1 \leq i, j \leq m$ such that $L_i$ is $\neg L_j$.
-Since $q \lor q$ has no such pair of literals,
-this disjunction of literals is \textbf{not valid}.
+\section{Conclusion}
 
-Proposition 1.45 states that a formula is satisfiable iff
-its negation is not valid. Negation of our formula is
-$\fneg{q \lor q}$, and in CNF form:
-\begin{align*}
-&\equiv \neg q \land \neg q
-\end{align*}
+We are very content with the final version of our program. It is able
+to produce proofs in a very appealing way, despite being a command-line
+application. With the interactions of the user, it can prepare any
+propositional logic proof using natural deduction, having a strict
+enforcement on its validity at each and every step.
 
-The resulting formula is the conjunction of two identical
-disjunction of literals that consist of a single literal.
-Since there is no pair of literals of form $L_i = \neg L_j$ in
-$\neg q$, the negated formula is not valid by Lemma 1.43, and therefore
-our original formula is \textbf{satisfiable} by Proposition 1.45.
-
-\subsection{A conjunction}
-The formula is as follows:
-$$
-\fland{\neg q \imp q}{q \imp \neg q}
-$$
-
-We can transform it into the CNF form:
-\begin{align*}
-&\equiv \fland{\neg\neg q \lor q}{\neg q \lor \neg q}\\
-&\equiv \fland{q \lor q}{\neg q \lor \neg q}
-\end{align*}
-
-For the formula to be valid, both the $q \lor q$ and
-$\neg q \lor \neg q$ needs to be valid. However, as proven in
-the previous exercise, former is not valid, therefore the
-formula is also \textbf{not valid}.
-
-The negation of the formula is:
-$$
-\fneg{\fland{q \lor q}{\neg q \lor \neg q}}.
-$$
-
-We can transform it into the CNF form:
-\begin{align*}
-&\equiv \FloR{\fneg{q \lor q}}{\fneg{\neg q \lor \neg q}}\\
-&\equiv \flor{\neg q \land \neg q}{\neg\neg q \land \neg\neg q}\\
-&\equiv \flor{\neg q \land \neg q}{q \land q}\\
-&\equiv \fland{\floR{\neg q \land \neg q}{q}}{\floR{\neg q \land \neg q}{q}}\\
-&\equiv \fland{\fland{\neg q \lor q}{\neg q \lor q}}{\fland{\neg q \lor q}{\neg q \lor q}}\\
-&\equiv \FlanD{\fland{\neg q \lor q}{\neg q \lor q}}{\fland{\neg q \lor q}{\neg q \lor q}}
-\end{align*}
-
-The resulting formula is the conjunction of 4 identical
-disjunction of literals that consist of $q$ and $\neg q$.
-Since $L_i = q$ and $L_j = \neg q$ is of the form $L_i = \neg L_j$
-it is valid, and therefore all 4 of them are valid, and consequently
-the negated formula is also valid.
-
-By Proposition 1.45, negated formula being valid means that
-the original formula is \textbf{not satisfiable}.
+The software has an engine embedded within, and uses that engine at its
+core to consume input and provide output through a monospace terminal.
+Overall, the software is intended to be used as a stand-alone command-line
+application. However, with only some minor modifications, it can be turned
+into a tool and a back-end engine for any other application.
 
 \end{document}

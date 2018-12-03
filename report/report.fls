@@ -1,4 +1,6 @@
-PWD C:/Users/utkan/Downloads/Git/Interactive-Propositional-Logic-Engine/report
+PWD C:/Users/utkan/OneDrive/Desktop/Universite/Verification/Project/report
+INPUT c:/texlive/2018/texmf.cnf
+INPUT c:/texlive/2018/texmf-dist/web2c/texmf.cnf
 INPUT c:/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt
 INPUT report.tex
 OUTPUT report.log
@@ -30,6 +32,14 @@ INPUT c:/texlive/2018/texmf-dist/tex/latex/multirow/multirow.sty
 INPUT c:/texlive/2018/texmf-dist/tex/latex/multirow/multirow.sty
 INPUT c:/texlive/2018/texmf-dist/tex/latex/tools/hhline.sty
 INPUT c:/texlive/2018/texmf-dist/tex/latex/tools/hhline.sty
+INPUT c:/texlive/2018/texmf-dist/tex/latex/textgreek/textgreek.sty
+INPUT c:/texlive/2018/texmf-dist/tex/latex/textgreek/textgreek.sty
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-fontenc/lgrenc.def
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-fontenc/lgrenc.def
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-inputenc/lgrenc.dfu
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-inputenc/lgrenc.dfu
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-fontenc/greek-fontenc.def
+INPUT c:/texlive/2018/texmf-dist/tex/latex/greek-fontenc/greek-fontenc.def
 INPUT c:/texlive/2018/texmf-dist/tex/latex/setspace/setspace.sty
 INPUT c:/texlive/2018/texmf-dist/tex/latex/setspace/setspace.sty
 INPUT c:/texlive/2018/texmf-dist/tex/latex/preprint/fullpage.sty
@@ -240,6 +250,8 @@ INPUT c:/texlive/2018/texmf-dist/tex/latex/colortbl/colortbl.sty
 INPUT report.aux
 INPUT report.aux
 OUTPUT report.aux
+INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmr.fd
+INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmr.fd
 INPUT c:/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT c:/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT c:/texlive/2018/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
@@ -287,16 +299,17 @@ INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
-INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmbx8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
+INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmtt.fd
+INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmtt.fd
+INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cbfonts/gttn1000.tfm
 INPUT report.aux
 INPUT ./report.out
 INPUT ./report.out
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb
@@ -312,3 +325,4 @@ INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti7.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
 INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb
+INPUT c:/texlive/2018/texmf-dist/fonts/type1/public/cbfonts/gttn1000.pfb
