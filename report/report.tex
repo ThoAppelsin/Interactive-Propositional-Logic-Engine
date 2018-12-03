@@ -286,14 +286,14 @@ A proof step is a declaration, and should have a \textit{rationale}
 stated next to it. Following is a complete list of valid rationales
 for a proof step:
 \begin{center}
-	\begin{tabular}{r l}
-		\textbf{Rationale} & \textbf{Can be used next to propositions which...}\\
-		Premise: & ... are found in the premises of the sequent to be proved.\\
-		Proof rule: & ... that fit to the conclusion of a proof rule, and only if the
+	\begin{tabular}{r | p{37em}}
+		\textbf{Rationale} & \textbf{Can be used next to propositions which\ldots{}}\\\hline
+		Premise: & \ldots{} are found in the premises of the sequent to be proved.\\
+		Proof rule: & \ldots{} that fit to the conclusion of a proof rule, and only if the
 			corresponding premises of that proof rule is available and validated in a
 			previous step. Those steps must be referenced in the rationale in the
 			same order as they appear in the proof rule.\\
-		Assumption: & ... appear as the first proof step of an assumption box.
+		Assumption: & \ldots{} appear as the first proof step of an assumption box.
 	\end{tabular}
 \end{center}
 
@@ -453,8 +453,9 @@ Here is the full list of those alternatives, next to their Unicode
 originals:
 
 \begin{center}
-	\begin{tabular}{l | l l}
-		\textbf{Unicode} & \textbf{Alternative \#1} & \textbf{Alternative \#2}\\
+	\begin{tabular}{c | c c}
+		\multirow{2}{*}{\textbf{Unicode}} & \multicolumn{2}{c}{\textbf{\underline{Alternative}}}\\
+		& \textbf{\#1} & \textbf{\#2}\\
 		\hline
 		$\mathtt{\top}$  & \verb|T|                & \verb|TRUE|\\
 		$\mathtt{\bot}$  & \verb|F|                & \verb|FALSE|\\
@@ -476,12 +477,25 @@ all the atoms should be in the form of the following regular expression:
 \verb|[a-z][0-9]*|
 \end{center}
 
-There can be as many spaces around the tokens as the user feels like,
+There can be as many spaces around the tokens as the user may input,
 as well as no space at all. A couple of example propositions our program
 would accept are as follows:
 
-% TODO
-TODO EXAMPLES
+\begin{center}
+	\begin{tabular}{l | l}
+		\verb^(((!p) & q) -> (p & (q | (!r))))^ & \verb^(p1 -> (p2 -> (p3 -> p4)))^\\
+		\verb^!p & q -> p & (q | !r)^           & \verb^p1 -> p2 -> p3 -> p4^\\
+		\verb^!p&q   ->   p&((q)|!r)^           & \verb^(((p1->p2->p3->p4)))^
+	\end{tabular}
+\end{center}
+
+All 6 of the inputs are valid, and the ones on the same column are
+two different ways of writing the same proposition. The top ones are
+explicit and well-formed formulas, while the remaining 4 are dependent
+on conventions of precedence. The bottom ones are untidy examples, where
+there are a superfluous spaces and then sometimes none. Last examples
+also exhibit extra parenthesis, which are adequately handled by the
+parenthesis elimination routine in our program.
 
 \subsubsection{Sequents}
 
@@ -505,7 +519,19 @@ of an atomic proposition that does not exist in any one of the premises.
 As with the propositions, there can be as many spaces around the tokens as
 the user feels like, as well as no space at all. A couple of example sequents
 our program would accept are as follows:
-% TODO
+
+\begin{center}
+	\begin{tabular}{l}
+		\verb^!q -> !p => p -> !!q^\\
+		\verb^p -> (q -> r), p, !r => !q^\\
+		\verb^p -> q -> r  , p  , !r=>!q^\\
+		\verb^=> (q -> r) -> ((!q -> !p) -> (p -> r))^\\
+		\verb^(q -> r)   ->  ((!q -> !p) -> (p -> r))^
+	\end{tabular}
+\end{center}
+
+Here, second and third, and fourth and fifth sequents are equivalent, i.e.
+will be interpreted as the same by our program.
 
 \subsubsection{Natural deduction statements}
 
@@ -610,7 +636,23 @@ be tolerated and result in an error and therefore termination of execution.
 We provide the following example natural deduction statements accepted by
 our program:
 
-% TODO
+\begin{center}
+	\begin{tabular}{l}
+		\verb^LEM q^\\
+		\verb^nege 4, 5^\\
+		\verb^nege 4 5^\\
+		\verb^bote 6 p->r^\\
+		\verb^assume (p->n) & (n->p)^\\
+		\verb^conclude^\\
+		\verb^ore 2, 5-7, 8-8^\\
+		\verb^undo^
+	\end{tabular}
+\end{center}
+
+Note how we may keep or omit commas as argument/identifier separators.
+The parser is able to distinguish arguments simply from their forms,
+and by utilizing the knowledge that no natural deduction statement
+expects multiple propositons on its arguments.
 
 \section{Example execution}
 
@@ -626,8 +668,8 @@ enforcement on its validity at each and every step.
 
 The software has an engine embedded within, and uses that engine at its
 core to consume input and provide output through a monospace terminal.
-Overall, the software is intended to be used as a stand-alone command-line
-application. However, with only some minor modifications, it can be turned
-into a tool and a back-end engine for any other application.
+Overall, the software is intended to be used as an interactive, stand-alone
+command-line application. However, with only some minor modifications,
+it can also be turned into a tool and a back-end engine for any other application.
 
 \end{document}

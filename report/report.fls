@@ -1,6 +1,4 @@
-PWD C:/Users/utkan/OneDrive/Desktop/Universite/Verification/Project/report
-INPUT c:/texlive/2018/texmf.cnf
-INPUT c:/texlive/2018/texmf-dist/web2c/texmf.cnf
+PWD C:/Users/utkan/Downloads/Git/Interactive-Propositional-Logic-Engine/report
 INPUT c:/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt
 INPUT report.tex
 OUTPUT report.log
