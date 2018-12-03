@@ -440,8 +440,41 @@ to precedence rules described in again the same section.
 
 In general, and with respect to the BNF specification, a proposition
 consists of atoms, negation, conjunction, disjunction, and implication
-symbols, and finally parenthesis. We extend this to accommodate the
-constants for tautology and disjunction to also be valid propositions.
+symbols, and finally parenthesis. We extend this list of constituents with
+constants for tautology and contradiction, which we have seen to take
+place in propositions, both in the proof rules and the example we gave.
+
+Since we cannot expect users to input Unicode characters like $\land$
+for the \textbf{and} operation, we instead accept sensible ASCII
+alternatives to represent these operations. We do not accept the
+Unicode originals, even if the user somehow manages to type them down.
+Here is the full list of those alternatives, next to their Unicode
+originals:
+
+\begin{center}
+	\begin{tabular}{l | l l}
+		\textbf{Unicode} & \textbf{Alternative \#1} & \textbf{Alternative \#2}\\
+		\hline
+		$\mathtt{\top}$  & \verb|T|                & \verb|TRUE|\\
+		$\mathtt{\bot}$  & \verb|F|                & \verb|FALSE|\\
+		$\mathtt{\neg}$  & \verb|!|                & \\
+		$\mathtt{\land}$ & \verb|&|                & \verb|*|\\
+		$\mathtt{\lor}$  & \verb^|^                & \verb|+|\\
+		$\mathtt{\imp}$  & \verb|->|               & \\
+		$\mathtt{()}$    & \verb|()|               & \verb|[]|\\
+		$\mathtt{q_1}$   & \verb|q1|               &
+	\end{tabular}
+\end{center}
+
+Atomic propositions symbolized with a single letter is simply to be input
+by that letter, and the ones with numbers in their subscripts may have
+their numbers right next to them, but not as a subscript, as they are
+input to the program. More specifically, all the atoms should be in the
+form of the following regular expression:
+
+\begin{center}
+\verb|[a-z][0-9]*|
+\end{center}
 
 % TODO
 
