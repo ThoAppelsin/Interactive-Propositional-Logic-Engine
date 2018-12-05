@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex report"] 1544032325 "report.aux" "report.bbl" "report" 1544032335
+["bibtex report"] 1544037832 "report.aux" "report.bbl" "report" 1544037958
   "c:/texlive/2018/texmf-dist/bibtex/bst/base/plain.bst" 1525873196 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   "ref.bib" 1544031652 202 65d5832acac12efea2d8366c6c048dfe ""
-  "report.aux" 1544032333 1995 3168d33c442687bb9baac7b41b549c3b ""
+  "report.aux" 1544037957 3238 a0f71db44fd554ef7bfdc90900d48e5b ""
   (generated)
-  "report.blg"
   "report.bbl"
-["pdflatex"] 1544032326 "report.tex" "report.pdf" "report" 1544032335
+  "report.blg"
+["pdflatex"] 1544037947 "report.tex" "report.pdf" "report" 1544037958
   "c:/texlive/2018/texmf-dist/fonts/map/fontname/texfonts.map" 1525874988 3332 103109f5612ad95229751940c61aada0 ""
   "c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1525872591 1004 54797486969f23fa377b128694d548df ""
   "c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1525872591 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -195,12 +195,13 @@
   "c:/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1525880258 2757785 060acdffb54be51f87b4293499b773c6 ""
   "c:/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt" 1525880403 4216949 148fda0b0203b7d209b94ace1b26a9e8 ""
   "c:/texlive/2018/texmf.cnf" 1525880232 673 4ae7b2f49cee444c5343a45b5d0f169c ""
-  "report.aux" 1544032333 1995 3168d33c442687bb9baac7b41b549c3b ""
-  "report.bbl" 1544032326 231 e91362ee3d7bd74d4acde63660dc971a "bibtex report"
-  "report.out" 1544032333 721 c294145118ad5584a3859cad54d3f5f9 ""
-  "report.tex" 1544032203 29008 8a462befbe0bc6d333cb41de3fba4519 ""
+  "example.png" 1544033251 61629 be9fabe27a86f8a4df62f6e5cdda18e2 ""
+  "report.aux" 1544037957 3238 a0f71db44fd554ef7bfdc90900d48e5b ""
+  "report.bbl" 1544037832 231 e91362ee3d7bd74d4acde63660dc971a "bibtex report"
+  "report.out" 1544037957 1041 1138de8e84b1eeebd62b1443787f0df5 ""
+  "report.tex" 1544037947 34065 d6b638b01ebf8cf39c76a05b775064d5 ""
   (generated)
-  "report.out"
   "report.log"
-  "report.aux"
+  "report.out"
   "report.pdf"
+  "report.aux"

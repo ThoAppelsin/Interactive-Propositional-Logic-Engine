@@ -305,6 +305,9 @@ INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmtt.fd
 INPUT c:/texlive/2018/texmf-dist/tex/latex/cbfonts-fd/lgrcmtt.fd
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cbfonts/gttn1000.tfm
+INPUT example.png
+INPUT ./example.png
+INPUT ./example.png
 INPUT report.bbl
 INPUT report.bbl
 INPUT report.aux

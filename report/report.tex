@@ -301,38 +301,42 @@ for a proof step:
 Here is an example of a proof for the sequent
 $p \lor q, \neg q \lor r \seq p \lor r$:
 
-\begin{logicproof}{2}
-    p \lor q                & premise\\
-    \neg q \lor r           & premise\\
-    q \lor \neg q           & \lem\\
-    \begin{subproof}
-        q                   & assumption\\
-        \begin{subproof}
-            \neg q          & assumption\\
-            \bot            & \nege{4}{5}\\
-            r               & \bote{6}
-        \end{subproof}
-        \begin{subproof}
-            r               & assumption
-        \end{subproof}
-        r                   & \lore{2}{5}{7}{8}{8}\\
-        p \lor r            & \loriy{9}
-    \end{subproof}
-    \begin{subproof}
-        \neg q              & assumption\\
-        \begin{subproof}
-            p               & assumption
-        \end{subproof}
-        \begin{subproof}
-            q               & assumption\\
-            \bot            & \nege{13}{11}\\
-            p               & \bote{14}
-        \end{subproof}
-        p                   & \lore{1}{12}{12}{13}{15}\\
-        p \lor r            & \lorix{16}
-    \end{subproof}
-    p \lor r                & \lore{3}{4}{10}{11}{17}
-\end{logicproof}
+\begin{figure}[H]
+	\begin{logicproof}{2}
+		p \lor q                & premise\\
+		\neg q \lor r           & premise\\
+		q \lor \neg q           & \lem\\
+		\begin{subproof}
+			q                   & assumption\\
+			\begin{subproof}
+				\neg q          & assumption\\
+				\bot            & \nege{4}{5}\\
+				r               & \bote{6}
+			\end{subproof}
+			\begin{subproof}
+				r               & assumption
+			\end{subproof}
+			r                   & \lore{2}{5}{7}{8}{8}\\
+			p \lor r            & \loriy{9}
+		\end{subproof}
+		\begin{subproof}
+			\neg q              & assumption\\
+			\begin{subproof}
+				p               & assumption
+			\end{subproof}
+			\begin{subproof}
+				q               & assumption\\
+				\bot            & \nege{13}{11}\\
+				p               & \bote{14}
+			\end{subproof}
+			p                   & \lore{1}{12}{12}{13}{15}\\
+			p \lor r            & \lorix{16}
+		\end{subproof}
+		p \lor r                & \lore{3}{4}{10}{11}{17}
+	\end{logicproof}
+	\caption{Proof for the sequent $p \lor q, \neg q \lor r \seq p \lor r$.}
+	\label{fig:proof}
+\end{figure}
 
 And here are remarks on this proof:
 \begin{enumerate}
@@ -376,7 +380,7 @@ that reads user input for proof rules, parses and evaluates it, and
 re-draws the working proof to the console window, in a loop. The
 loop ends when the conclusion of the initially input sequent is reached.
 
-In the following subsections, we will be giving out more details on
+In the following sections, we will be giving out more details on
 software's workflow, its the input specifications and some of its
 inner mechanisms. We will also mention some of its software design
 aspects, some of which have been made possible (with ease) of the
@@ -423,9 +427,9 @@ When a proof step with the proposition exactly the same as in the
 conclusion of the initially provided sequent and outside all of
 the assumption boxes, the program than declares success and
 exits. This concludes the workflow of the program, and also this
-subsection.
+section.
 
-\subsection{Input Specifications}
+\subsection{Input specifications}
 
 Our program accepts 3 different category of inputs:
 Propositions, sequents, and natural deduction statements
@@ -434,9 +438,9 @@ separately for a more structured view.
 
 \subsubsection{Propositions}
 
-Refer to the Subsection~\ref{sec:intr_prop} for the BNF specification
+Refer to the Section~\ref{sec:intr_prop} for the BNF specification
 for the well-formed formulas on propositions. As stated before
-in that subsection, we will not expect the user-provided formulas
+in that section, we will not expect the user-provided formulas
 to be well-formed, and tolerantly accept propositions according
 to precedence rules described in again the same section.
 
@@ -500,9 +504,9 @@ parenthesis elimination routine in our program.
 
 \subsubsection{Sequents}
 
-Refer to the section Introduction and its Subsection~\ref{sec:intr_nd}
-for the definitions of a sequent. Recall that a sequent with no premises
-is also a valid sequent, also known as a theorem.
+Refer to the Section~\ref{sec:intr_nd} for the definitions of a sequent.
+Recall that a sequent with no premises is also a valid sequent, also known
+as a theorem.
 
 List of premises in a sequent are to be separated with commas (\verb|,|)
 in our program, just like we do it on paper. The symbol $\vdash$ should
@@ -534,7 +538,7 @@ our program would accept are as follows:
 Here, second and third, and fourth and fifth sequents are equivalent, i.e.
 will be interpreted as the same by our program.
 
-\subsubsection{Natural deduction statements}
+\subsubsection{Natural deduction statements}\label{sec:spec_nd}
 
 \textit{Natural deduction rules} have no syntax, but they are rather rules to be
 applied to true propositions in order to establish the truth of newer ones. When a
@@ -655,9 +659,123 @@ The parser is able to distinguish arguments simply from their forms,
 and by utilizing the knowledge that no natural deduction statement
 expects multiple propositons on its arguments.
 
-\section{Example execution}
+\subsection{Output specification}
 
-% TODO
+Aside from some title and subtitle texts and prompt messages, the program
+provides some error/success messages, and most importantly, the depiction of the
+proof just like the one we have on this report with Proof~\ref{fig:proof}
+and the ones that can be found in the respective sections of the textbook
+from Huth and Ryan~\cite{huth2004logic}.
+
+\subsubsection{Error/success messages}
+
+There are 5 different messages that the program can provide, and 4 of them
+are error messages. You may refer to the following table for further
+description on what they mean:
+
+\begin{center}
+	\begin{tabular}{p{10em} p{20em} c}
+		\textbf{Message} & \textbf{Meaning} & \textbf{Prompt}\\
+		\texttt{Following will be regarded as an atomic proposition: >\AF{}<} &
+		You may receive this message when providing a proposition to the program.
+		While recursively parsing the (compositional) proposition, the program may
+		suggest considering a substring of the input string as an atomic proposition
+		as a fall-back measure. This happens when the program fails to fit the
+		substring it provides within the inverse angle-brackets (\verb|><|) on the
+		error message both as a compositional proposition and an atomic proposition,
+		according to the input specification. Unless the program has a defect, this
+		error indicates that the provided proposition is either malformed, or contains
+		an atomic proposition in the form that does not fit to the specification we have
+		given. Abort the execution for the former case, and you may continue at your own
+		risk for the latter. &
+		Yes\\
+		\texttt{Multiple => symbols detected} &
+		You may receive this while providing the initial sequent to the program.
+		It means that you have provided a sequent with multiple sequent symbols.
+		The program allows you to continue with that, in which case it will continue
+		by taking the whole input as the conclusion of the sequent. This does not make
+		sense and the user should normally abort the execution. &
+		Yes\\
+		\texttt{Unknown rule >identifier<, please retry} &
+		You may receive this while providing a natural deduction statement to the program.
+		It means that you have provided an input that starts with an identifier,
+		possibly to a natural deduction rule, as incorrect. Please refer to the
+		Section~\ref{sec:spec_nd} for the list of available natural deduction statements.
+		The program will allow the user to retry by asking for a natural deduction statement
+		again and repeatedly. &
+		No\\
+		\texttt{Ill-formed natural deduction rule, try again.} &
+		You may receive this while providing a natural deduction statement to the program.
+		This error happens when the provided statement has the correct identifier, but
+		the arguments are not appropriate. One reason could be that the natural deduction
+		statement was expecting a \AF{} argument, which the user may have forgotten to provide.
+		This error is also raised when the natural deduction statement provided is for
+		a natural deduction rule, and the given arguments are out of reach from the current
+		scope of the proof, e.g. the \AN{} referred is within an assumption box
+		that is already closed. Note that a reference to \AR{} must also enclose the whole
+		assumption box from its start to its end, and this error will again be raised otherwise.
+		Consult to the Section~\ref{sec:spec_nd} for the complete details. This error
+		will allow the user to retry. &
+		No\\
+		\texttt{Target reached!} &
+		This is a success message, indicating that the conclusion of the proof has
+		appeared as a proposition whose validity has been established. The program should
+		exit with success after this message.
+		&
+		No
+	\end{tabular}
+\end{center}
+
+\subsubsection{Depiction of the proof}
+
+
+
+\subsection{Example execution}
+
+To show reader a glimpse of what can be achieved using this program,
+here we present a screenshot of the program after it exits with success.
+In this particular execution, we were aiming to prove the validity
+of the sequent $p \lor q, \neg q \lor r \seq p \lor r$.
+
+\begin{figure}[H]
+	\includegraphics{example.png}
+	\caption{Proof for the sequent $p \lor q, \neg q \lor r \seq p \lor r$.
+	Note how closely it resembles the Proof~\ref{fig:proof}.}
+	\label{fig:example}
+\end{figure}
+
+Following lines are the exact input we have provided to our program,
+line-by-line, which brought us to the conclusion depicted in Figure~\ref{fig:example}:
+
+\begin{center}
+	\begin{tabular}{l}
+		\verb^p | q, !q | r => p | r^\\
+		\verb^LEM q^\\
+		\verb^assume q^\\
+		\verb^assume !q^\\
+		\verb^nege 4 5^\\
+		\verb^bote 6 r^\\
+		\verb^conclude^\\
+		\verb^assume r^\\
+		\verb^conclude^\\
+		\verb^ore 2 5-7 8-8^\\
+		\verb^ori2 9 p^\\
+		\verb^conclude^\\
+		\verb^assume !q^\\
+		\verb^assume p^\\
+		\verb^conclude^\\
+		\verb^assume q^\\
+		\verb^nege 13 11^\\
+		\verb^bote 14 p^\\
+		\verb^conclude^\\
+		\verb^ore 1 12-12 13-15^\\
+		\verb^ori1 16 r^\\
+		\verb^conclude^\\
+		\verb^ore 3 4-10 11-17^
+	\end{tabular}
+\end{center}
+
+\subsection{Implementation Details}
 
 \section{Conclusion}
 
