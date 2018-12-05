@@ -1,6 +1,4 @@
-PWD C:/Users/utkan/OneDrive/Desktop/Universite/Verification/Project/report
-INPUT c:/texlive/2018/texmf.cnf
-INPUT c:/texlive/2018/texmf-dist/web2c/texmf.cnf
+PWD C:/Users/utkan/Downloads/Git/Interactive-Propositional-Logic-Engine/report
 INPUT c:/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt
 INPUT report.tex
 OUTPUT report.log
@@ -285,6 +283,7 @@ INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmsy6.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
+INPUT c:/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
@@ -292,13 +291,13 @@ INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
-INPUT c:/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map
 INPUT c:/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
 INPUT c:/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmti7.tfm
+INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT c:/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm

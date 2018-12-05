@@ -6,4 +6,10 @@ Michael Huth and Mark Ryan.
   systems}.
 \newblock Cambridge university press, 2004.
 
+\bibitem{julia}
+NumFocus.
+\newblock The julia language.
+\newblock \url{https://julialang.org/}, 2018.
+\newblock [Online; accessed 9-Dec-2018].
+
 \end{thebibliography}

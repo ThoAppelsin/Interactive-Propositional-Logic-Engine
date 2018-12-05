@@ -89,6 +89,7 @@
 
 \begin{document}
 \maketitle
+\pagebreak
 
 \section{Introduction}
 
@@ -108,43 +109,41 @@ sentences with a truth value either \true{} or \false{},
 and can be recursively defined as the composition of
 some other, smaller, propositions. Smallest of propositions are
 called \textit{atomic} propositions, which are \textit{indecomposable}
-and are given a unique symbol for the declarations they make.
+and are given a unique symbol for the declaration they make.
 
 \textit{Compositionals} are propositions composed of other propositions,
 i.e. propositions that are not atomic. In propositional logic, there
-are 4 different ways of composing a \textit{compositional}:
+are 4 different ways of obtaining a \textit{compositional}:
 
 \begin{enumerate}
 	\item Negation ($\neg$): Negation of a proposition. E.g.
-		``it does not rain'' is the negation of ``it rains''.
+		``it does \underline{not} rain'' is the negation of ``it rains''.
 		If the original proposition has the truth value
 		\true{}/\false{}, then its negation has the truth value
 		\false{}/\true{}, respectively.
 	\item Conjunction ($\land$): Conjunction of two propositions. E.g.
-		``it does not rain and I am 25'' is the conjunction of the propositions
-		``it does not rain'' and ``I am 25''. The compositional has
-		the truth value \true{} only if both of its constituents
-		have the truth value \true{}, and otherwise \false{}.
+		``it does not rain \underline{and} I am 25'' is the conjunction of
+		the propositions ``it does not rain'' and ``I am 25''. The
+		compositional has the truth value \true{} only if both of its
+		constituents have the truth value \true{}, and otherwise \false{}.
 	\item Disjunction ($\lor$): Disjunction of two propositions. E.g.
 		the non-exclusive sense of the statement
-		``it is sunny or I am 5'' is the conjunction of the propositions
+		``it is sunny \underline{or} I am 5'' is the conjunction of the propositions
 		``it is sunny'' and ``I am 5''. The compositional has the truth
 		value \false{} only if both of its constituents have the truth
 		value \false{}, otherwise (if either one or both of its constituents
 		have the truth value \true{}) the compositional is \true{}.
-	\item Implication ($\imp$): Implication of the second proposition,
-		also known as the \textit{consequent}, by the first proposition,
-		also known as the \textit{antecedent}. E.g.
-		``if it is sunny then I am happy'' is the implication of
-		the proposition ``I am happy'' by the proposition ``it is sunny''.
-		The compositional has the truth value \false{} only if the
-		antecedent and consequent are \true{} and \false{}, respectively.
+	\item Implication ($\imp$): Implication of the second proposition
+		(\textit{consequent}) by the first proposition (\textit{antecedent}).
+		E.g. ``\underline{if} it is sunny \underline{then} I am happy'' is the
+		implication of the proposition ``I am happy'' by the proposition
+		``it is sunny''. The compositional has the truth value \false{} only
+		if the antecedent and consequent are \true{} and \false{}, respectively.
 \end{enumerate}
 
 To formally define the \textit{language} of propositional logic's
 \textit{well-formed formulas}, we give its Backus Naur form (BNF)
 as follows:
-
 \begin{bnf*}
 	\bnfprod{$\phi$}
 	{
@@ -159,7 +158,8 @@ as follows:
 	}\\
 	\bnfprod{atom}
 	{
-		\bnfts{$p$} \bnfor \bnfts{$q$} \bnfor \bnfts{\bnfsk} \bnfor
+		\bnfts{$p$} \bnfor \bnfts{$q$} \bnfor \bnfts{$r$} \bnfor
+		\bnfts{\bnfsk} \bnfor
 		\bnfts{$p_1$} \bnfor \bnfts{$p_2$} \bnfor \bnfts{\bnfsk}
 	}
 \end{bnf*}
@@ -167,15 +167,14 @@ as follows:
 While this definition requires each use of a compositional operator
 to introduce a new pair of parenthesis for the newly generated
 proposition to be a well-formed formula, in practice we encounter
-propositons with many of those parenthesis omitted. In absence of
+propositions with many of those parenthesis omitted. In absence of
 parenthesis to enforce an explicit precedence of operator application,
 following precedence conventions are consulted:
-
 \begin{itemize}
 	\item $\neg$ binds most tightly, followed by $\land$, $\lor$, and
 		finally $\imp$, in the given order.
 	\item Implication ($\imp$) is right-associative, i.e. the
-		rightmost implication is to be evaluated the first.
+		rightmost implication shall be evaluated the first.
 \end{itemize}
 
 Some books, including \textit{Logic in Computer Science} by Huth and
@@ -183,7 +182,7 @@ Ryan~\cite{huth2004logic},
 regard $\land$ and $\lor$ operations as equal in precedence, in which
 case a proposition like $p \lor q \land r$ should either be regarded
 as unintelligible, or the same as $((p \lor q) \land r)$.
-We will be adhering to the above listed convention.
+In our program, we will be adhering to the above listed convention.
 
 \subsection{Natural deduction}\label{sec:intr_nd}
 
@@ -201,37 +200,40 @@ Sequents with no premises are also valid sequents, and are called
 \textit{theorems}.
 
 Rules of natural deduction, also known as the previously mentioned
-proof rules, are at the heart of natural deduction, and this project.
-They allow us to establish a valid proof step with a proposition,
+proof rules, are at the heart of natural deduction, and also of this project.
+They allow us to establish the validity of newer propositions,
 using the previously validated list of propositions.
 
 At any step, we may introduce an \textit{assumption} to the proof,
 which, however, will introduce an assumption box along with it.
 The top line of the assumption box is drawn right above the step
-at which the assumption is introduced. We may close the assumption
-box after any step. A proof rule may only be applied to propositions,
-such that;
+where the assumption is introduced. We may close an assumption
+box after any step. Assumption boxes restrict the access to the propositions
+within from the steps outside. As a result, a proof rule may only be applied to
+propositions with following properties:
 \begin{itemize}
 	\item Their validity must have been previously established, and
-	\item Either they must be outside any assumption box, or their
-		assumption box must not have been closed, yet.
+	\item Either they must be outside of any assumption box, or the
+		assumption box they are in must not have been closed, yet.
 \end{itemize}
 
 We refer to such proof steps as the \textit{accessible steps}.
 
-A proof of a sequent is complete when the conclusion of the
-sequent is established using only the rules of natural deduction and
+A proof of a sequent is complete when the validity of the sequent's conclusion
+is established using only the rules of natural deduction and
 starting off with only the premises of the sequent. It is important to
 note that an established proposition may not be the conclusion if it is
 found within an \textit{assumption box}.
 
-Here is a list of all natural deduction rules we have embedded into
-our program, given in sequents:
+We have taken Huth and Ryan~\cite{huth2004logic} as our resource for the
+natural deduction rules. Here is a list of all natural deduction rules we
+have embedded into our program, given in sequents:
 
-\begin{center}
-	\renewcommand{\arraystretch}{1.2}
-	\newcommand{\nl}{\\[4pt]}
-	\newcommand{\nll}{\\[4pt]\hline}
+\begin{figure}[H]
+	\centering
+	\renewcommand{\arraystretch}{1}
+	\newcommand{\nl}{\\[3pt]}
+	\newcommand{\nll}{\\[3pt]\hline}
 	\begin{tabular}{l l|l}
 		\multicolumn{2}{l|}{\textbf{Name}} & \textbf{Rule}\\\hhline{==|=}
 		\multirow{3}{*}{Conjunction}
@@ -244,8 +246,8 @@ our program, given in sequents:
 		& Elimination      & $\phi \lor \psi, \boxed{\phi \dotsb \chi},
 			\boxed{\psi \dotsb \chi} \vdash \chi$\nll
 		\multirow{2}{*}{Implication}
-		& Introduction & $\boxed{\phi \dotsb \psi} \vdash \phi \implies \psi$\nl
-		& Elimination  & $\phi \implies \psi, \phi \vdash \psi$\nll
+		& Introduction & $\boxed{\phi \dotsb \psi} \vdash \phi \imp \psi$\nl
+		& Elimination  & $\phi \imp \psi, \phi \vdash \psi$\nll
 		\multirow{2}{*}{Negation}
 		& Introduction & $\boxed{\phi \dotsb \bot} \vdash \neg\phi$\nl
 		& Elimination  & $\phi, \neg\phi \vdash \bot$\nll
@@ -256,23 +258,25 @@ our program, given in sequents:
 		& Elimination  & $\neg\neg\phi \vdash \phi$\nll
 		\multicolumn{2}{l|}{MT (Modus Tollens)}
 		& $\phi \imp \psi, \neg\psi \vdash \neg\phi$\nll
-		\multicolumn{2}{l|}{PBC (Proof by Contraditcion)}
+		\multicolumn{2}{l|}{PBC (Proof by Contradiction)}
 		& $\boxed{\neg\phi \dotsb \bot} \vdash \phi$\nll
 		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
 		& $\vdash \phi \lor \neg\phi$\nll
 		\multicolumn{2}{l|}{Copy}
 		& $\phi \vdash \phi$
 	\end{tabular}
-\end{center}
+	\caption{Rules of Natural Deduction}
+	\label{fig:nd}
+\end{figure}
 
 The boxed premises such as $\boxed{\phi \dotsb \psi}$ on
 implication introduction, is an assumption box in the proof
 that starts right before the proposition $\phi$ and ends right
 after the proposition $\psi$. 
-To make step on the proof, one of the proof rules given
+To make a step on the proof, one of the proof rules given
 above must be used. To use a rule, we need accessible propositions
 and/or assumption boxes that fits to the rule's sequent's propositions.
-Only if we are able to fulfill the \textit{requirements} of the rule,
+Only if we are able to fulfill those \textit{requirements} of the rule,
 we then may establish the validity of a new proposition according
 to the definition of the rule, and specifically the rule's sequent's
 conclusion. In natural deduction, this is the only way to
@@ -289,12 +293,15 @@ for a proof step:
 \begin{center}
 	\begin{tabular}{r | p{37em}}
 		\textbf{Rationale} & \textbf{Can be used next to propositions which\ldots{}}\\\hline
-		Premise: & \ldots{} are found in the premises of the sequent to be proved.\\
-		Proof rule: & \ldots{} that fit to the conclusion of a proof rule, and only if the
-			corresponding premises of that proof rule is available and validated in a
-			previous step. Those steps must be referenced in the rationale in the
+		Premise: & \ldots{} are found in the premises of the sequent
+			to be proved.\\
+		Proof rule: & \ldots{} fit to the conclusion of a proof rule,
+			and only if the corresponding premises of that proof rule
+			is available and validated in a previous step. Those steps
+			must be referenced in the rationale in the
 			same order as they appear in the proof rule.\\
-		Assumption: & \ldots{} appear as the first proof step of an assumption box.
+		Assumption: & \ldots{} appear as the first proof step of an
+			assumption box.
 	\end{tabular}
 \end{center}
 
@@ -302,6 +309,8 @@ Here is an example of a proof for the sequent
 $p \lor q, \neg q \lor r \seq p \lor r$:
 
 \begin{figure}[H]
+	\centering
+	% \setstretch{1.5}
 	\begin{logicproof}{2}
 		p \lor q                & premise\\
 		\neg q \lor r           & premise\\
@@ -338,21 +347,21 @@ $p \lor q, \neg q \lor r \seq p \lor r$:
 	\label{fig:proof}
 \end{figure}
 
-And here are remarks on this proof:
+Some remarks on this proof:
 \begin{enumerate}
 	\item Note that on step \#3, we use the rule \lem{} without
 		any argument. It really does not depend on any one of the
-		previous steps, however, it actually has an argument $q$,
-		which is the reason why it is a rationale for $q \lor \neg q$
-		and not $\neg r \lor \neg\neg r$.
+		previous steps, however, it actually has a hidden argument,
+		$q$, making it establish the validity of $q \lor \neg q$
+		and not, for example, $\neg r \lor \neg\neg r$.
 	\item Note the order of arguments on step \#14. With respect to the
-		rule of negation elimination ($\neg_\elim$), second of its two
-		arguments must be the negation-applied of the first one, which
+		rule of negation elimination ($\neg_\elim$), latter of its two
+		arguments must be the negation-applied of the former, which
 		is why we first refer to $q$ and then $\neg q$, and not the other
 		way around. Also note that negation-applied is not the same
-		as negation-discarded, although they semantically have the same meaning.
+		as negation-discarded, although they semantically are the same.
 	\item Note how assumption boxes are referred to with ranges, i.e.
-		the starting index, followed by a dash, and followed by the ending index.
+		a starting index and an ending index separated with a dash.
 \end{enumerate}
 
 Hereby we conclude with our definitions on propositional logic
@@ -367,15 +376,15 @@ engine \textit{using natural deduction}. With this project,
 we propose an \textit{interactive} propositional logic engine
 using natural deduction.
 
-Our product is a software that allows its user to build up valid proofs
+Our product is a software that allows its users to build up valid proofs
 for any given propositional logic sequent. By stating the rule they
-want to use and specifying the arguments that want to use it with,
+want to use and specifying the arguments that they want to use it with,
 users can establish the truth of newer propositions and get them added
 to the proof as a step. The proof rules are embedded into the software,
 ensuring the validity of the proof throughout the execution.
 
 The software comes with a command-line interface, which is a REPL%
-\footnote{Read-Eval-Print-Loop}
+\footnote{Read-Evaluate-Print-Loop}
 that reads user input for proof rules, parses and evaluates it, and
 re-draws the working proof to the console window, in a loop. The
 loop ends when the conclusion of the initially input sequent is reached.
@@ -384,7 +393,7 @@ In the following sections, we will be giving out more details on
 software's workflow, its the input specifications and some of its
 inner mechanisms. We will also mention some of its software design
 aspects, some of which have been made possible (with ease) of the
-programming language Julia.
+programming language Julia~\cite{julia}.
 
 \subsection{Workflow}
 
@@ -395,13 +404,14 @@ a sequent that is to be proven.
 
 After being provided a sequent, the program enters the proof mode,
 where it will start displaying a working proof structure with step
-numbers and box visualizations with ASCII box characters for the
-assumption boxes. In this mode, the user is repeatedly asked to
+numbers and box visualizations with monospace box-drawing characters%
+\footnote{\url{https://en.wikipedia.org/wiki/Box-drawing\_characters}}
+for the assumption boxes. In this mode, the user is repeatedly asked to
 provide a natural deduction rule to apply. With the provided
 natural deduction rule, along with its parameters, the software
 will do either one of the following:
 \begin{itemize}
-	\item If the rule is applicable to the given arguments, it will
+	\item If the rule is indeed applicable to the given arguments, it will
 		add the proposition, validity of which has been established
 		using the provided proof rule with the given arguments, and
 		then re-draw the proof with the new step on the proof.
@@ -418,14 +428,13 @@ deduction rule, and only apply a properly provided natural deduction
 rule. However, as stated above, it may fail to recover promptly
 and ask for the user to retry if an input is malformed.
 
-Apart from the natural deduction rules with their parameters,
-some other keyword statements can be provided to the program
-to perform the closure of an assumption box, and, for user's
-convenience, to undo the last action.
+Apart from the natural deduction rules, some other statements can be
+provided to the program to perform the opening and closure of an assumption
+box, and, for user's convenience, to undo the last action.
 
-When a proof step with the proposition exactly the same as in the
-conclusion of the initially provided sequent and outside all of
-the assumption boxes, the program than declares success and
+Whenever a proof step with a proposition exactly the same as in the
+conclusion of the initially provided sequent appears and is outside of all
+the assumption boxes, the program then declares success and
 exits. This concludes the workflow of the program, and also this
 section.
 
@@ -445,10 +454,12 @@ to be well-formed, and tolerantly accept propositions according
 to precedence rules described in again the same section.
 
 In general, and with respect to the BNF specification, a proposition
-consists of atoms, negation, conjunction, disjunction, and implication
-symbols, and finally parenthesis. We extend this list of constituents with
-constants for tautology and contradiction, which we have seen to take
-place in propositions, both in the proof rules and the example we gave.
+consists of atoms, operator symbols for negation, conjunction,
+disjunction, and implication operators, and finally parenthesis.
+We extend this list of constituents with constants for tautology and
+contradiction, which we have seen to take place in propositions, both
+in the proof rules (Figure~\ref{fig:nd}) and the example proof
+(Figure~\ref{fig:proof}) we gave.
 
 Since we cannot expect users to input Unicode characters like $\land$
 for the \textbf{and} operation, we instead accept sensible ASCII
@@ -495,7 +506,7 @@ would accept are as follows:
 \end{center}
 
 All 6 of the inputs are valid, and the ones on the same column are
-two different ways of writing the same proposition. The top ones are
+three different ways of writing the same proposition. The top ones are
 explicit and well-formed formulas, while the remaining 4 are dependent
 on conventions of precedence. The bottom ones are untidy examples, where
 there are a superfluous spaces and then sometimes none. Last examples
@@ -535,21 +546,22 @@ our program would accept are as follows:
 	\end{tabular}
 \end{center}
 
-Here, second and third, and fourth and fifth sequents are equivalent, i.e.
-will be interpreted as the same by our program.
+Here the sequents in rows 2 and 3, and then the ones in rows 4 and 5
+are equivalent, i.e. will be interpreted as the same by our program.
 
 \subsubsection{Natural deduction statements}\label{sec:spec_nd}
 
 \textit{Natural deduction rules} have no syntax, but they are rather rules to be
-applied to true propositions in order to establish the truth of newer ones. When a
-proposition is introduced using a natural deduction rule, however, we have to
-specify the rule as a rationale next to that proposition in a very specific way.
+applied to true propositions in order to establish the truth of newer ones.
+When a new proposition is introduced using a natural deduction rule, however,
+we have to specify the rule as a rationale next to that proposition in a
+very specific way.
 
 \newcommand{\AN}{\texttt{\#}}
 \newcommand{\AR}{\texttt{\#-\#}}
 \newcommand{\AF}{\texttt{\textphi}}
 
-In our program, we adopt this rationale syntax, as we expect user to provide
+In our program, we adopt this rationale syntax for the
 \textit{natural deduction statements}. In general, a natural deduction statement
 should start with the identifier of the corresponding natural deduction rule,
 followed by the list of parameters it takes. Here, parameters are either one of
@@ -561,10 +573,12 @@ the following three:
 \end{itemize}
 
 The following table specifies all of the natural deduction statements that our
-program accepts: First two columns are the names of the statements, and corresponds
-to the names of the natural deduction rules. The next column is the identifier for
-the statement, and the following columns are placeholders for one of the three
-different types of parameters as listed above.
+program accepts: First two columns have the names of the statements,
+and corresponds to the names of the natural deduction rules if the
+statement is for a rule. The next column is for the statement's identifier,
+and the following columns contain placeholders for one of the three
+different types of parameters as listed above, to indicate which type
+of a parameter that specific natural deduction statement expects.
 
 The last 3 statements on the table are the only ones that do not have a corresponding
 natural deduction rule. First two are there to open and close assumption boxes,
@@ -573,7 +587,7 @@ of the last (non-\verb|undo|) statement they have provided.
 
 \begin{center}
 	\renewcommand{\arraystretch}{1}
-	\begin{tabular}{l l|l|l l l}
+	\begin{tabular}{l l|l|c c c}
 		\multicolumn{2}{l|}{\multirow{2}{*}{\textbf{Name}}}
 		& \multirow{2}{*}{\textbf{Identifier}}
 		& \multicolumn{3}{c}{\textbf{\underline{Arguments}}} \\
@@ -602,7 +616,7 @@ of the last (non-\verb|undo|) statement they have provided.
 		& Elimination  & \verb|negnege| & \AN & & \\\hline
 		\multicolumn{2}{l|}{MT (Modus Tollens)}
 		& \verb|MT| & \AN & \AN & \\\hline
-		\multicolumn{2}{l|}{PBC (Proof by Contraditcion)}
+		\multicolumn{2}{l|}{PBC (Proof by Contradiction)}
 		& \verb|PBC| & \AR & & \\\hline
 		\multicolumn{2}{l|}{LEM (Law of Excluded Middle)}
 		& \verb|LEM| & \AF & & \\\hline
@@ -626,19 +640,20 @@ the line right before the end of an assumption box closing line.
 The \AF{} should be replaced by any proposition, as previously described
 at the propositions' input specification.
 
-The user may separate the identifier from the first argument either with
-one or more space characters (\verb| |), or a comma (\verb|,|)
+The user may separate the identifier of the statement from the first argument
+either with one or more space characters (\verb| |), or a comma (\verb|,|)
 with any amount of space characters around it. The arguments should also
 be separated from each other in a similar fashion.
 
 All the arguments are necessary, and the program will not proceed when
-they are missing. Program tolerates the natural deduction statement input
-when the user forgets to provide the necessary \AF{} argument, by letting
+they are missing. The program tolerates an invalid natural deduction statement
+input when the user forgets to provide the necessary \AF{} argument, by letting
 the user try again. However, forgetting to provide other types of arguments,
 or providing different types of arguments than necessary, may possibly not
-be tolerated and result in an error and therefore termination of execution.
+be tolerated and result in an error and therefore cause an abrupt
+termination of execution.
 
-We provide the following example natural deduction statements accepted by
+Following lines are examples to natural deduction statements accepted by
 our program:
 
 \begin{center}
@@ -657,13 +672,61 @@ our program:
 Note how we may keep or omit commas as argument/identifier separators.
 The parser is able to distinguish arguments simply from their forms,
 and by utilizing the knowledge that no natural deduction statement
-expects multiple propositons on its arguments.
+expects multiple propositions on its arguments.
+
+\subsection{Internal representations}\label{sec:inrep}
+
+A handful of abstract type and structure declarations are to be found
+on the first lines of our program's source code, with a couple more
+in its rest. Explicit typing in Julia allows the programmer to leverage
+the multiple-dispatch feature of the language.
+
+\verb|Atom| and \verb|Neg| types are for atomic propositions and
+negated propositions, respectively, and both are categorized under \verb|Unit|
+abstract type, to carry out the information that they need not be
+parenthesized when incorporated into other proposition types.
+\verb|And|, \verb|Or|, and \verb|Imp|, on the other hand, are for
+conjuncts, disjuncts, and implications, respectively. They are
+categorized under \verb|Compound| abstract type, which lets us tell
+that they have to be parenthesized when found as an element of another
+proposition.
+
+Types \verb|True| and \verb|False| are of abstract type \verb|Literal|,
+which is a subtype of \verb|Unit| again. Both \verb|Unit| and
+\verb|Compound| are subtypes of \verb|Formula|, which is an alias
+for \textit{proposition} in our program.
+
+A \verb|Sequent| consists of an \textit{array of formulas} for premises, and
+a \textit{formula} the conclusion.
+
+Our final structure is for the proof steps, and they contain
+the proposition and the rationale of the step. One of the biggest
+challenges in developing our program was to find the adequate
+and efficient way to represent the assumption boxes in proof steps.
+After several trials and attempts, we have decided to include
+that bit of information also in our \verb|ProofStep| structure
+with the Boolean fields \verb|indent| and \verb|outdent|, where
+\verb|indent| means that the current step has an assumption box
+starting right above it, and \verb|outdent| means that an assumption
+box ends right after the current proof step.
+
+An example failed attempt on encoding the information of assumption
+boxes in proof steps is to have a depth counter to keep the nesting
+index for assumption boxes. We hoped to be able to tell where to
+draw the opening and closure lines with this information, however,
+we have realized that it is bound to fail on some of the cases,
+and realized this early enough, luckily. An example case where this
+idea would fail is when there are two adjacent assumption boxes,
+where an assumption box ends at the $n$-th step, and another one
+opens at the $(n + 1)$-th step. Those two steps would then have
+the same indentation level with this representation, making it look
+as if they are within the same assumption box.
 
 \subsection{Output specification}
 
 Aside from some title and subtitle texts and prompt messages, the program
 provides some error/success messages, and most importantly, the depiction of the
-proof just like the one we have on this report with Proof~\ref{fig:proof}
+working proof just like the one we have on this report with Proof~\ref{fig:proof}
 and the ones that can be found in the respective sections of the textbook
 from Huth and Ryan~\cite{huth2004logic}.
 
@@ -674,61 +737,90 @@ are error messages. You may refer to the following table for further
 description on what they mean:
 
 \begin{center}
-	\begin{tabular}{p{10em} p{20em} c}
+	\begin{tabular}{p{12em} p{28em} c}
 		\textbf{Message} & \textbf{Meaning} & \textbf{Prompt}\\
 		\texttt{Following will be regarded as an atomic proposition: >\AF{}<} &
-		You may receive this message when providing a proposition to the program.
-		While recursively parsing the (compositional) proposition, the program may
-		suggest considering a substring of the input string as an atomic proposition
-		as a fall-back measure. This happens when the program fails to fit the
-		substring it provides within the inverse angle-brackets (\verb|><|) on the
-		error message both as a compositional proposition and an atomic proposition,
-		according to the input specification. Unless the program has a defect, this
-		error indicates that the provided proposition is either malformed, or contains
-		an atomic proposition in the form that does not fit to the specification we have
-		given. Abort the execution for the former case, and you may continue at your own
-		risk for the latter. &
+		Indicates that there has been an error while parsing the provided
+		proposition. Unless the program has a defect, the provided proposition
+		must either be malformed, or it has an atomic proposition that
+		does not fit the input specification. Abort if the former is true,
+		continue at your own risk otherwise. &
 		Yes\\
 		\texttt{Multiple => symbols detected} &
-		You may receive this while providing the initial sequent to the program.
-		It means that you have provided a sequent with multiple sequent symbols.
-		The program allows you to continue with that, in which case it will continue
-		by taking the whole input as the conclusion of the sequent. This does not make
-		sense and the user should normally abort the execution. &
+		Indicates that the sequent input had more than one sequent symbols.
+		Continuing will make the program regard the whole input as a theorem.
+		Termination is recommended. &
 		Yes\\
-		\texttt{Unknown rule >identifier<, please retry} &
-		You may receive this while providing a natural deduction statement to the program.
-		It means that you have provided an input that starts with an identifier,
-		possibly to a natural deduction rule, as incorrect. Please refer to the
-		Section~\ref{sec:spec_nd} for the list of available natural deduction statements.
-		The program will allow the user to retry by asking for a natural deduction statement
-		again and repeatedly. &
+		\texttt{Unknown rule >id<, please retry} &
+		Indicates that the natural deduction statement starts with an
+		unrecognized identifier. The program will allow user to retry.
+		Please refer to Section~\ref{sec:spec_nd} for the list of
+		available natural deduction statements. &
 		No\\
 		\texttt{Ill-formed natural deduction rule, try again.} &
-		You may receive this while providing a natural deduction statement to the program.
-		This error happens when the provided statement has the correct identifier, but
-		the arguments are not appropriate. One reason could be that the natural deduction
-		statement was expecting a \AF{} argument, which the user may have forgotten to provide.
-		This error is also raised when the natural deduction statement provided is for
-		a natural deduction rule, and the given arguments are out of reach from the current
-		scope of the proof, e.g. the \AN{} referred is within an assumption box
-		that is already closed. Note that a reference to \AR{} must also enclose the whole
-		assumption box from its start to its end, and this error will again be raised otherwise.
-		Consult to the Section~\ref{sec:spec_nd} for the complete details. This error
-		will allow the user to retry. &
+		Indicates that the provided natural deduction statement had a proper
+		identifier, but the arguments were inappropriate. Reasons for
+		inappropriateness could be reference to \textit{inaccessible}
+		proof steps or assumption boxes, \AR{} input that does not refer
+		to an assumption box from its start to its end, or lack of an argument,
+		and most probably a \AF{} argument. The program will allow user to
+		retry. Refer to Section~\ref{sec:spec_nd} for the complete details. &
 		No\\
 		\texttt{Target reached!} &
-		This is a success message, indicating that the conclusion of the proof has
-		appeared as a proposition whose validity has been established. The program should
-		exit with success after this message.
+		This is a success message, indicating that the proof is complete.
+		The program should exit with success after this message.
 		&
 		No
 	\end{tabular}
 \end{center}
 
-\subsubsection{Depiction of the proof}
+\subsubsection{Depiction of the working proof}
 
+After the sequent is input, the program starts presenting a depiction
+of the working proof. After each successful application of a natural
+deduction statement, the display is cleaned and the updated depiction
+is drawn.
 
+Constrained to the command-line interface, the depiction is prepared
+using monospace characters. Assumption boxes are prepared using
+box-drawing characters and cascaded boxes are depicted as if they
+were stack of scopes, with assumption boxes laid on top of each other
+with an offset.
+
+Line numbers are printed to the left of the proof steps.
+Propositions for proof steps are aligned from their left,
+and rationale for the steps are printed as aligned from their
+right, with the necessary amount of spacing calculated and
+printed in between.
+
+Apart from the visualizations, the way how we format the propositions
+and rationales for printing might be of interest to the user/reader.
+
+First, the rationales for the proof steps are prepared with simple
+string interpolation on template strings that we have embedded
+to our code. Every natural deduction rule based natural deduction
+statement prepares its own corresponding rationale for the proof
+step it generates. While we do not oblige users to give natural
+deduction rules with commas separating their identifiers and
+arguments, we print them with commas for a clean and uniform look.
+Similarly, we print them with symbols and not with the identifiers,
+which we had introduced for our users to conveniently type them.
+For example, a proper usage of statement \texttt{impi 4-6} will
+prepare a rationale like $\mathtt{\rightarrow_i, 4-6}$.
+
+While preparing the propositions for printing, we leverage the
+internal representation of them. Using the distinction between
+types \verb|Unit| and \verb|Compound|, we parenthesize propositions
+only if their main connective is a binary operator, and only if the
+proposition is not at the top level. As a result, the propositions
+we print relies on the convention of unary operators having precedence
+over the binary operators. Since we keep the parenthesis for prioritizing
+all three binary operators, we hope that our propositions do not lose
+much from its clarity, while its cleaner and less-cluttered look
+augments its readability.
+
+Refer to the Section~\ref{sec:inrep} for more details on internal
+representations.
 
 \subsection{Example execution}
 
@@ -738,6 +830,7 @@ In this particular execution, we were aiming to prove the validity
 of the sequent $p \lor q, \neg q \lor r \seq p \lor r$.
 
 \begin{figure}[H]
+	\centering
 	\includegraphics{example.png}
 	\caption{Proof for the sequent $p \lor q, \neg q \lor r \seq p \lor r$.
 	Note how closely it resembles the Proof~\ref{fig:proof}.}
@@ -775,8 +868,6 @@ line-by-line, which brought us to the conclusion depicted in Figure~\ref{fig:exa
 	\end{tabular}
 \end{center}
 
-\subsection{Implementation Details}
-
 \section{Conclusion}
 
 We are very content with the final version of our program. It is able
@@ -789,7 +880,8 @@ The software has an engine embedded within, and uses that engine at its
 core to consume input and provide output through a monospace terminal.
 Overall, the software is intended to be used as an interactive, stand-alone
 command-line application. However, with only some minor modifications,
-it can also be turned into a tool and a back-end engine for any other application.
+it can also be turned into a tool and a back-end engine for any other
+application.
 
 \bibliography{ref} 
 \bibliographystyle{plain}
