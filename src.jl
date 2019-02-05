@@ -520,7 +520,22 @@ function accomplished(Γ, ψ)
 	return false
 end
 
-function main(args)
+function parse_commandline()
+	s = ArgParseSettings()
+
+	@add_arg_table s begin
+		"--tool"
+			help = "Runs this program as tool"
+			action = :store_true
+	end
+
+	parse_args(s)
+end
+
+function main()
+	parsed_args = parse_commandline()
+	tool = parsed_args[tool]
+	
 	clear()
 	Δ = parse_sequent(input("Sequent: "))
 
@@ -553,6 +568,6 @@ function main(args)
 	end
 end
 
-main(ARGS)
+main()
 
 # println(parse_sequent(length(ARGS) ≥ 1 ? ARGS[1] : "a & b"))
