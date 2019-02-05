@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage{mathtools}
 \usepackage{backnaur}
 \usepackage{multirow}
@@ -291,7 +291,7 @@ A proof step is a declaration, and should have a \textit{rationale}
 stated next to it. Following is a complete list of valid rationales
 for a proof step:
 \begin{center}
-	\begin{tabular}{r | p{37em}}
+	\begin{tabular}{r | p{31em}}
 		\textbf{Rationale} & \textbf{Can be used next to propositions which\ldots{}}\\\hline
 		Premise: & \ldots{} are found in the premises of the sequent
 			to be proved.\\
@@ -740,7 +740,7 @@ description on what each error message means, on top of what
 they already say:
 
 \begin{center}
-	\begin{tabular}{p{12em}p{28em}c}
+	\begin{tabular}{p{8em}p{25em}c}
 		\textbf{Message} & \textbf{Meaning} & \textbf{Prompt}\\
 		\texttt{Following will be regarded as an atomic proposition: >\AF{}<} &
 		Indicates that there has been an error while parsing the provided
@@ -830,7 +830,7 @@ representations.
 To show reader a glimpse of what can be achieved using
 this program, here we present a screenshot of the program
 after it exits with success. Next to it, we have listed the
-first 17 of the inputs we have provided to our program,
+first 13 of the inputs we have provided to our program,
 line-by-line.
 
 In this particular execution, we were aiming to prove the
@@ -841,7 +841,7 @@ Proof~\ref{fig:proof}.
 \begin{minipage}{0.65\textwidth}
 \begin{figure}[H]
 	\centering
-	\includegraphics{example.png}
+	\includegraphics[scale=0.92]{example.png}
 	\caption{Screenshot for the proof.}
 \end{figure}
 \end{minipage}
@@ -862,13 +862,9 @@ Proof~\ref{fig:proof}.
 		\verb^ori2 9 p^\\
 		\verb^conclude^\\
 		\verb^assume !q^\\
-		\verb^assume p^\\
-		\verb^conclude^\\
-		\verb^assume q^\\
-		\verb^nege 13 11^\\
 		{[remaining steps are omitted]}
 	\end{tabular}
-	\caption{First 17 inputs.}
+	\caption{First 13 inputs.}
 \end{figure}
 \end{minipage}
 
