@@ -1,3 +1,5 @@
+using ArgParse
+
 abstract type Formula end
 abstract type Compound <: Formula end
 abstract type Unit <: Formula end
@@ -534,7 +536,7 @@ end
 
 function main()
 	parsed_args = parse_commandline()
-	tool = parsed_args[tool]
+	tool = parsed_args["tool"]
 	
 	clear()
 	Δ = parse_sequent(input("Sequent: "))
